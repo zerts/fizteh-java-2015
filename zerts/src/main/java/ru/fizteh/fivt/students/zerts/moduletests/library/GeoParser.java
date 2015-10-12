@@ -4,6 +4,7 @@ import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.GeoExeption;
 import twitter4j.GeoLocation;
 import twitter4j.JSONException;
 import twitter4j.JSONObject;
+import twitter4j.JSONTokener;
 
 import java.io.*;
 import java.net.URL;
@@ -13,7 +14,7 @@ import static java.lang.Double.parseDouble;
 
 public class GeoParser {
     static final int TIME_TO_WAIT_FOR_YANDEX = 100;
-    private static String getKey() throws IOException, GeoExeption {
+    public static String getKey() throws IOException, GeoExeption {
         try (BufferedReader in = new BufferedReader(new FileReader(
                 GeoParser.class.getResource("/yandexkey.properties").getFile()))) {
             return in.readLine();
@@ -24,19 +25,17 @@ public class GeoParser {
     public static String getMyPlace() throws IOException, JSONException, GeoExeption {
         URL getCityName = new URL("http://api.hostip.info/get_json.php");
         String city;
-        try (BufferedReader apihostipIn = new BufferedReader(new InputStreamReader(getCityName.openStream()))) {
-            String siteAnswer = apihostipIn.readLine();
-            System.out.println(siteAnswer);
-            JSONObject jsonParse = new JSONObject(siteAnswer);
+        try (InputStream apihostipIn = getCityName.openStream()) {
+            //String siteAnswer = apihostipIn.readLine();
+            //System.out.println(apihostipIn);
+            JSONTokener tokenizer = new JSONTokener(apihostipIn);
+            JSONObject jsonParse = new JSONObject(tokenizer);
             city = jsonParse.getString("city");
             if (Objects.equals("(Unknown city)", city)) {
                 getCityName = new URL("http://ipinfo.io/json");
-                try (BufferedReader ipinfoIn = new BufferedReader(new InputStreamReader(getCityName.openStream()))) {
-                    siteAnswer = "";
-                    while (!siteAnswer.contains("}")) {
-                        siteAnswer += ipinfoIn.readLine();
-                    }
-                    jsonParse = new JSONObject(siteAnswer);
+                try (InputStream ipinfoIn = getCityName.openStream()) {
+                    tokenizer = new JSONTokener(ipinfoIn);
+                    jsonParse = new JSONObject(tokenizer);
                     city = jsonParse.getString("city");
                 }
             }
@@ -49,47 +48,28 @@ public class GeoParser {
     }
     public static GeoLocation getCoordinates(String place) throws IOException, GeoExeption, InterruptedException,
             JSONException {
-        //System.out.println(place);
         if (place.equals("nearby")) {
             place = getMyPlace();
         }
-        //System.out.println(place);
-        URL getTheLL = new URL("https://geocode-maps.yandex.ru/1.x/?geocode=" + place + "&apikey=" + getKey());
-        BufferedReader in;
-        try {
-            in = new BufferedReader(new InputStreamReader(getTheLL.openStream()));
-        } catch (IOException io) {
-            Thread.sleep(TIME_TO_WAIT_FOR_YANDEX);
-            in = new BufferedReader(new InputStreamReader(getTheLL.openStream()));
+        URL getTheLL = new URL("https://geocode-maps.yandex.ru/1.x/?format=json&geocode=" + place + "&apikey="
+                + getKey());
+        String city;
+        System.out.println(getTheLL);
+        try (InputStream yandexIn = getTheLL.openStream()) {
+            //System.out.println(getTheLL);
+            JSONTokener tokenizer = new JSONTokener(yandexIn);
+            JSONObject jsonParse = new JSONObject(tokenizer);
+            city = jsonParse.getJSONObject("response")
+                    .getJSONObject("GeoObjectCollection")
+                    .getJSONArray("featureMember")
+                    .getJSONObject(0)
+                    .getJSONObject("GeoObject")
+                    .getJSONObject("Point")
+                    .getString("pos");
         }
-        String xmlParse;
-        do {
-            xmlParse = in.readLine();
-            //System.out.println(xmlParse);
-            if (xmlParse != null && xmlParse.contains("<pos>")) {
-                break;
-            }
-        } while (xmlParse != null);
-        if (xmlParse == null) {
-            return null;
-        }
-        int i = 0;
-        while (xmlParse.charAt(i) != '>') {
-            i++;
-        }
-        i++;
-        String currLattitude = "", currLongtitude = "";
-        while (xmlParse.charAt(i) != ' ') {
-            currLongtitude += xmlParse.charAt(i);
-            i++;
-        }
-        i++;
-        while (xmlParse.charAt(i) != '<') {
-            currLattitude += xmlParse.charAt(i);
-            i++;
-        }
-        System.out.println(currLattitude + " " + currLongtitude);
-        return new GeoLocation(parseDouble(currLattitude), parseDouble(currLongtitude));
+        String[] currLL= city.split(" ");
+        //System.out.println(city);
+        return new GeoLocation(parseDouble(currLL[1]), parseDouble(currLL[0]));
     }
     static double sqr(double number) {
         return number * number;

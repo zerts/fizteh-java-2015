@@ -43,4 +43,14 @@ public class TimeParserTest extends TestCase {
 
         //TimeParser.printGoneDate(Date.from(givenTime.atZone(ZoneId.systemDefault()).toInstant()));
     }
+
+    public void testRightWordPrinting() throws Exception {
+        assertEquals("минут назад", TimeParser.rightWordPrinting(5, 0));
+
+        assertEquals("час назад", TimeParser.rightWordPrinting(1, 1));
+
+        assertEquals("дня назад", TimeParser.rightWordPrinting(2, 2));
+
+        assertEquals("ретвитов", TimeParser.rightWordPrinting(12, 3));
+    }
 }
