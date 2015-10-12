@@ -42,7 +42,6 @@ public class GeoParserTest extends TestCase {
     public void testGetCoordinates() throws Exception {
         String place = "Moscow";
         GeoLocation location = new GeoLocation(55.753960, 37.620393); //Moscow
-
         String data = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
                 "<ymaps xmlns=\"http://maps.yandex.ru/ymaps/1.x\" xmlns:xsi=\"" +
                 "http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"" +
