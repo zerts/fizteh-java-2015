@@ -8,14 +8,15 @@ import java.util.concurrent.TimeUnit;
 import static java.lang.Thread.sleep;
 
 public class TweetPrinter {
-    static final int RT_MODE = 4;
+    static final int RT_MODE = 3;
     private static int printedTweets = 0;
     public static int getPrintedTweets() {
         return printedTweets;
     }
-    public static void printTweet(Status tweet, ArgsParser argsPars, boolean streamMode) {
+    public static String printTweet(Status tweet, ArgsParser argsPars, boolean streamMode) {
+        String result = "";
         if (tweet.isRetweet() && argsPars.isNoRetweetMode()) {
-            return;
+            return result;
         }
         try {
             sleep(TimeUnit.SECONDS.toMillis(1L));
@@ -24,26 +25,24 @@ public class TweetPrinter {
         }
         if (!streamMode) {
             TimeParser timePars = new TimeParser();
-            TimeParser.printGoneDate(tweet.getCreatedAt().getTime());
+            result += TimeParser.printGoneDate(tweet.getCreatedAt());
         }
         printedTweets++;
-        Printer.print("@" + tweet.getUser().getScreenName() + ": ");
+        result += "@" + tweet.getUser().getScreenName() + ": ";
         String text = tweet.getText();
         if (tweet.isRetweet()) {
             if (argsPars.isNoRetweetMode()) {
-                return;
+                return "";
             }
-            Printer.print("ретвитнул ");
-            Printer.print("@" + tweet.getRetweetedStatus().getUser().getScreenName());
-            Printer.print(tweet.getRetweetedStatus().getText());
+            result += "ретвитнул @" + tweet.getRetweetedStatus().getUser().getScreenName()
+                    + tweet.getRetweetedStatus().getText();
         } else {
-            Printer.print(tweet.getText());
+            result += tweet.getText();
         }
         if (!argsPars.isStreamMode() && !tweet.isRetweet() && tweet.getRetweetCount() != 0) {
-            Printer.print(" (");
-            TimeParser.rightWordPrinting(tweet.getRetweetCount(), RT_MODE);
-            Printer.print(")");
+            result += " (" + TimeParser.rightWordPrinting(tweet.getRetweetCount(), RT_MODE) + ")";
         }
-        Printer.printLine();
+        result += Printer.printLine();
+        return result;
     }
 }

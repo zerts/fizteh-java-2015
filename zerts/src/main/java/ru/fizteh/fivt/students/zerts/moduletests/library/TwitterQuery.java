@@ -34,13 +34,13 @@ public class TwitterQuery {
                         Printer.print(argsPars.getPlace());
                     }
                 }
-                Printer.printLine();
+                Printer.print(Printer.printLine());
                 if (tweets.isEmpty()) {
                     Printer.print("Sorry, no tweets found :(\n");
                     System.exit(0);
                 }
                 for (Status tweet : tweets) {
-                    TweetPrinter.printTweet(tweet, argsPars, false);
+                    Printer.print(TweetPrinter.printTweet(tweet, argsPars, false));
                     if (argsPars.getNumberOfTweets() == TweetPrinter.getPrintedTweets()) {
                         return;
                     }

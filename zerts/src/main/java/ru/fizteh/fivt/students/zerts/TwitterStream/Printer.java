@@ -11,11 +11,11 @@ public class Printer {
     public static void printError(String message) {
         System.err.println(message);
     }
-    public static void printLine() {
-        print("\n");
+    public static String printLine() {
+        String result = "\n";
         for (int i = 0; i < LINE_LENGTH; i++) {
-            print("-");
+            result += "-";
         }
-        print("\n");
+        return result + "\n";
     }
 }

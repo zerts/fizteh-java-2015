@@ -12,7 +12,6 @@ import java.util.Objects;
 import static java.lang.Double.parseDouble;
 
 public class GeoParser {
-    static final int CITY_PARSER_TAB = 7;
     static final int TIME_TO_WAIT_FOR_YANDEX = 100;
     private static String getKey() throws IOException, GeoExeption {
         try (BufferedReader in = new BufferedReader(new FileReader(
@@ -24,9 +23,10 @@ public class GeoParser {
     }
     public static String getMyPlace() throws IOException, JSONException, GeoExeption {
         URL getCityName = new URL("http://api.hostip.info/get_json.php");
-        String city = "";
+        String city;
         try (BufferedReader apihostipIn = new BufferedReader(new InputStreamReader(getCityName.openStream()))) {
             String siteAnswer = apihostipIn.readLine();
+            System.out.println(siteAnswer);
             JSONObject jsonParse = new JSONObject(siteAnswer);
             city = jsonParse.getString("city");
             if (Objects.equals("(Unknown city)", city)) {
@@ -88,7 +88,7 @@ public class GeoParser {
             currLattitude += xmlParse.charAt(i);
             i++;
         }
-        //System.out.println(currLattitude + " " + currLongtitude);
+        System.out.println(currLattitude + " " + currLongtitude);
         return new GeoLocation(parseDouble(currLattitude), parseDouble(currLongtitude));
     }
     static double sqr(double number) {

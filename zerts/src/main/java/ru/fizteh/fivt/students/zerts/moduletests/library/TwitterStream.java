@@ -1,5 +1,6 @@
 package ru.fizteh.fivt.students.zerts.moduletests.library;
 
+import ru.fizteh.fivt.students.zerts.TwitterStream.Printer;
 import ru.fizteh.fivt.students.zerts.TwitterStream.TwitterReader;
 import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.GeoExeption;
 import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.NoQueryExeption;
@@ -17,7 +18,7 @@ public class TwitterStream {
             @Override
             public void onStatus(Status status) {
                 if (argsPars.getPlace() == null) {
-                    TweetPrinter.printTweet(status, argsPars, true);
+                    Printer.print(TweetPrinter.printTweet(status, argsPars, true));
                 } else {
                     GeoLocation tweetLocation = null;
                     if (status.getGeoLocation() != null) {
@@ -51,7 +52,7 @@ public class TwitterStream {
                             return;
                         }
                         if (GeoParser.near(tweetLocation, queryLocation, TwitterReader.getLocateRadius())) {
-                            TweetPrinter.printTweet(status, argsPars, true);
+                            Printer.print(TweetPrinter.printTweet(status, argsPars, true));
                         }
                     } catch (IOException | GeoExeption e) {
                         e.printStackTrace();

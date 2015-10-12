@@ -19,7 +19,7 @@ public class TwitterUserTimeline {
                 Paging p = new Paging(currPage);
                 tweets = twitter.getHomeTimeline(p);
                 for (Status tweet : tweets) {
-                    TweetPrinter.printTweet(tweet, argsPars, true);
+                    Printer.print(TweetPrinter.printTweet(tweet, argsPars, true));
                     if (argsPars.getNumberOfTweets() == TweetPrinter.getPrintedTweets()) {
                         return;
                     }
