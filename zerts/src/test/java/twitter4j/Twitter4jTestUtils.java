@@ -19,7 +19,6 @@ public class Twitter4jTestUtils {
                 JSONObject tweet = array.getJSONObject(i);
                 tweets.add(new StatusJSONImpl(tweet));
             }
-
             return tweets;
         } catch (IOException | JSONException | TwitterException e) {
             throw new RuntimeException(e);

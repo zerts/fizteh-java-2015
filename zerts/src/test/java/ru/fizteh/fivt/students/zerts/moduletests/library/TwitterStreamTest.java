@@ -70,8 +70,7 @@ public class TwitterStreamTest extends TestCase {
         twitterService.listenForTweets(argsParser, tweets::add);
 
         assertThat(tweets, hasSize(100));
-        assertThat(tweets, hasItems("@Owl_Juliann_: А мы сегодня с Викой добрались наконец-то до чайных дел "
-                + "мастерской! На удивительной фарворовой… https://t.co/nenvrVtV0o"));
+        assertThat(tweets, hasItems("@Owl_Juliann_: We are here! https://t.co/nenvrVtV0o"));
     }
 
     @Test
