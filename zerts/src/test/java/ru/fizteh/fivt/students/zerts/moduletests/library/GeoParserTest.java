@@ -21,7 +21,6 @@ public class GeoParserTest extends TestCase {
     private URL getCityName;
     private URL getTheLL;
     static final String PLACE = "Moscow";
-    GeoParser geoParser = new GeoParser("nearby");
 
     @Before
     public void setUp() throws Exception {
@@ -40,7 +39,7 @@ public class GeoParserTest extends TestCase {
         InputStream stream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
         PowerMockito.when(getCityName.openStream()).thenReturn(stream);
 
-        String myPlace = geoParser.getMyPlace();
+        String myPlace = GeoParser.getMyPlace();
         System.out.println(myPlace);
         assertEquals(PLACE, myPlace);
     }
@@ -48,7 +47,7 @@ public class GeoParserTest extends TestCase {
     @Test
     public void testGetCoordinates() throws Exception {
         GeoLocation location = new GeoLocation(55.753960, 37.620393); //Moscow
-        String data;
+        String data = "", newLine = "";
         try (BufferedReader in = new BufferedReader(new FileReader(
                 GeoParser.class.getResource("/yandexAnswer").getFile()))) {
             data = in.readLine();
@@ -57,7 +56,7 @@ public class GeoParserTest extends TestCase {
         InputStream stream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
         PowerMockito.when(getTheLL.openStream()).thenReturn(stream);
         //System.out.println(getTheLL);
-        GeoLocation geoParserResult = geoParser.getCoordinates(PLACE);
+        GeoLocation geoParserResult = GeoParser.getCoordinates(PLACE);
         assertEquals(location.getLatitude(), geoParserResult.getLatitude(), 1);
         assertEquals(location.getLongitude(), geoParserResult.getLongitude(), 1);
     }
@@ -66,11 +65,11 @@ public class GeoParserTest extends TestCase {
         GeoLocation first = new GeoLocation(55.753960, 37.620393);
         GeoLocation second = new GeoLocation(56.753960, 39.620393);
         double radius = 5000;
-        assertEquals(true, geoParser.near(first, second, radius));
+        assertEquals(true, GeoParser.near(first, second, radius));
 
         first = new GeoLocation(55.753960, 37.620393);
         second = new GeoLocation(56.753960, 39.620393);
         radius = 1;
-        assertEquals(false, geoParser.near(first, second, radius));
+        assertEquals(false, GeoParser.near(first, second, radius));
     }
 }

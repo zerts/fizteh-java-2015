@@ -8,9 +8,6 @@ public class Printer {
     public static void print(char message) {
         System.out.print(message);
     }
-    public static void printTweet(String tweet) {
-        System.out.print(tweet + printLine());
-    }
     public static void printError(String message) {
         System.err.println(message);
     }

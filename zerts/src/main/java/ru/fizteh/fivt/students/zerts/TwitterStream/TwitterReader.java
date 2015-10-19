@@ -4,17 +4,12 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.GeoExeption;
 import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.GetTimelineExeption;
+import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.NoQueryExeption;
 import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.SearchTweetExeption;
-import ru.fizteh.fivt.students.zerts.moduletests.library.ArgsParser;
-import ru.fizteh.fivt.students.zerts.moduletests.library.TwitterQuery;
-import ru.fizteh.fivt.students.zerts.moduletests.library.TwitterStream;
-import ru.fizteh.fivt.students.zerts.moduletests.library.TwitterUserTimeline;
-import twitter4j.JSONException;
-import twitter4j.TwitterFactory;
-import twitter4j.TwitterStreamFactory;
+import ru.fizteh.fivt.students.zerts.moduletests.library.*;
+import twitter4j.*;
 
-import java.io.IOException;
-import java.util.List;
+import java.io.*;
 
 public class TwitterReader {
     static final int LOCATE_RADIUS = 50;
@@ -31,11 +26,12 @@ public class TwitterReader {
         } catch (ParameterException pe) {
             Printer.printError("Invalid Paramters:\n" + pe.getMessage());
         }
-        twitter4j.Twitter twitter = new TwitterFactory().getInstance();
-        twitter4j.TwitterStream twitter4jStream = new TwitterStreamFactory().getInstance();
         if (argsPars.isStreamMode()) {
-            TwitterStream twitterStream = new TwitterStream(twitter, twitter4jStream);
-            twitterStream.listenForTweets(argsPars, Printer::printTweet);
+            try {
+                ru.fizteh.fivt.students.zerts.moduletests.library.TwitterStream.stream(argsPars);
+            } catch (NoQueryExeption | GeoExeption e) {
+                e.printStackTrace();
+            }
         } else if (argsPars.getQuery() == null) {
             try {
                 TwitterUserTimeline.userStream(argsPars);
@@ -44,15 +40,7 @@ public class TwitterReader {
             }
         } else {
             try {
-                TwitterQuery twitterQuery = new TwitterQuery(twitter);
-                List<String> queryResult;
-                queryResult = twitterQuery.query(argsPars);
-                if (queryResult == null || queryResult.isEmpty()) {
-                    return;
-                }
-                for (String tweet : queryResult) {
-                    Printer.print(tweet);
-                }
+                TwitterQuery.query(argsPars);
             } catch (GeoExeption | SearchTweetExeption | InterruptedException | JSONException e) {
                 e.printStackTrace();
             }

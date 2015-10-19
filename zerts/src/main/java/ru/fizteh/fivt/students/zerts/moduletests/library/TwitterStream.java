@@ -3,34 +3,17 @@ package ru.fizteh.fivt.students.zerts.moduletests.library;
 import ru.fizteh.fivt.students.zerts.TwitterStream.Printer;
 import ru.fizteh.fivt.students.zerts.TwitterStream.TwitterReader;
 import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.GeoExeption;
+import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.NoQueryExeption;
 import twitter4j.*;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
-import static java.lang.Thread.sleep;
 
 public class TwitterStream {
-
-    private final twitter4j.TwitterStream twitterStream;
-
-    private GeoParser geoParser = new GeoParser("Moscow");
-
-    public TwitterStream(Twitter twitter, twitter4j.TwitterStream twitterStream) {
-        this.twitterStream = twitterStream;
-    }
-
-    private String formatTweet(Status status) {
-        try {
-            sleep(TimeUnit.SECONDS.toMillis(1L));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public static void stream(ArgsParser argsPars) throws NoQueryExeption, GeoExeption {
+        if (argsPars.getQuery() == null) {
+            throw new NoQueryExeption();
         }
-        return "@" + status.getUser().getScreenName() + ": " + status.getText();
-    }
-
-    public void listenForTweets(ArgsParser argsPars, Consumer<String> listener) {
+        twitter4j.TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
         twitterStream.addListener(new StatusAdapter() {
             @Override
             public void onStatus(Status status) {
@@ -41,12 +24,11 @@ public class TwitterStream {
                     if (status.getGeoLocation() != null) {
                         tweetLocation = new GeoLocation(status.getGeoLocation().getLatitude(),
                                 status.getGeoLocation().getLongitude());
-                    } else if (!(status.getUser().getLocation() == null)) {
+                    } else if (!status.getUser().getLocation().isEmpty()) {
                         try {
                             //System.out.println(status.getUser().getLocation());
                             try {
-                                tweetLocation = geoParser.getCoordinates(status.getUser().getLocation());
-                                //System.out.println(tweetLocation);
+                                tweetLocation = GeoParser.getCoordinates(status.getUser().getLocation());
                             } catch (GeoExeption | InterruptedException | JSONException e) {
                                 e.printStackTrace();
                             }
@@ -59,29 +41,27 @@ public class TwitterStream {
                     try {
                         GeoLocation queryLocation = null;
                         try {
-                            queryLocation = geoParser.getCoordinates(argsPars.getPlace());
+                            queryLocation = GeoParser.getCoordinates(argsPars.getPlace());
                         } catch (GeoExeption | InterruptedException | JSONException e) {
                             e.printStackTrace();
                         }
-                        if (geoParser.near(tweetLocation, queryLocation, TwitterReader.getLocateRadius())
-                                && TweetPrinter.printTweet(status, argsPars, true) != null) {
-                            Printer.print(TweetPrinter.printTweet(status, argsPars, true));
-                            listener.accept(formatTweet(status));
+                        if (queryLocation == null) {
+                            throw new GeoExeption();
                         }
-                    } catch (IOException e) {
+                        if (tweetLocation == null) {
+                            return;
+                        }
+                        if (GeoParser.near(tweetLocation, queryLocation, TwitterReader.getLocateRadius())) {
+                            Printer.print(TweetPrinter.printTweet(status, argsPars, true));
+                        }
+                    } catch (IOException | GeoExeption e) {
                         e.printStackTrace();
                     }
                 }
-
-            }
-
-            @Override
-            public void onException(Exception ex) {
-                ex.printStackTrace();
             }
         });
-        String[] query = new String[1];
-        query[0] = argsPars.getQuery();
-        twitterStream.filter(new FilterQuery().track(query));
+        String[] trackArray = argsPars.getQuery().toArray(new String[argsPars.getQuery().size()]);
+        twitterStream.filter(new FilterQuery().track(trackArray));
     }
+
 }

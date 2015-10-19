@@ -3,11 +3,12 @@ package ru.fizteh.fivt.students.zerts.moduletests.library;
 import ru.fizteh.fivt.students.zerts.TwitterStream.Printer;
 import twitter4j.Status;
 
+import java.util.concurrent.TimeUnit;
+
+import static java.lang.Thread.sleep;
+
 public class TweetPrinter {
     static final int RT_MODE = 3;
-    public static void setPrintedTweets(int printedTweets) {
-        TweetPrinter.printedTweets = printedTweets;
-    }
     private static int printedTweets = 0;
     public static int getPrintedTweets() {
         return printedTweets;
@@ -15,7 +16,12 @@ public class TweetPrinter {
     public static String printTweet(Status tweet, ArgsParser argsPars, boolean streamMode) {
         String result = "";
         if (tweet.isRetweet() && argsPars.isNoRetweetMode()) {
-            return null;
+            return result;
+        }
+        try {
+            sleep(TimeUnit.SECONDS.toMillis(1L));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         if (!streamMode) {
             TimeParser timePars = new TimeParser();
