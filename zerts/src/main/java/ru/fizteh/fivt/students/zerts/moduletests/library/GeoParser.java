@@ -18,7 +18,7 @@ public class GeoParser {
     }
     public static String getKey() throws IOException, GeoExeption {
         try (BufferedReader in = new BufferedReader(new FileReader(
-                GeoParser.class.getResource("/yandexkey.properties").getFile()))) {
+                GeoParser.class.getResource("/yandexkey").getFile()))) {
             return in.readLine();
         } catch (IOException ioe) {
             throw new GeoExeption("Can't read the yandex key. Please, check your keyfile!");
