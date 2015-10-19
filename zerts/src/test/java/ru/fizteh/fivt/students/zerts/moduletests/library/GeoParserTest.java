@@ -30,7 +30,8 @@ public class GeoParserTest extends TestCase {
 
         getTheLL = PowerMockito.mock(URL.class);
         PowerMockito.whenNew(URL.class).withArguments("https://geocode-maps.yandex.ru/1.x/?format=json&geocode="
-                + PLACE + "&apikey=" + GeoParser.getKey()).thenReturn(getTheLL);
+                + PLACE + "&apikey=AEpbCFYBAAAASOuPOQIBg8DHj8Ntfn_0Mwo5S6UjS7my7xYAAAAAAAAAAABMWqQjMsyiftYfJdRc"
+                + "_-QaNBUXUw==").thenReturn(getTheLL);
     }
 
     @Test
