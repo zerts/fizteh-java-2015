@@ -15,10 +15,11 @@ public class Printer {
         System.err.println(message);
     }
     public static String printLine() {
-        String result = "\n";
+        StringBuilder result = new StringBuilder().append("\n");
         for (int i = 0; i < LINE_LENGTH; i++) {
-            result += "-";
+            result.append("-");
         }
-        return result + "\n";
+        result.append("\n");
+        return result.toString();
     }
 }

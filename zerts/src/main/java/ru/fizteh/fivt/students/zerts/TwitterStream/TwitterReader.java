@@ -3,12 +3,10 @@ package ru.fizteh.fivt.students.zerts.TwitterStream;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.GeoExeption;
-import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.GetTimelineExeption;
 import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.SearchTweetExeption;
 import ru.fizteh.fivt.students.zerts.moduletests.library.ArgsParser;
 import ru.fizteh.fivt.students.zerts.moduletests.library.TwitterQuery;
 import ru.fizteh.fivt.students.zerts.moduletests.library.TwitterStream;
-import ru.fizteh.fivt.students.zerts.moduletests.library.TwitterUserTimeline;
 import twitter4j.JSONException;
 import twitter4j.TwitterFactory;
 import twitter4j.TwitterStreamFactory;
@@ -36,12 +34,6 @@ public class TwitterReader {
         if (argsPars.isStreamMode()) {
             TwitterStream twitterStream = new TwitterStream(twitter, twitter4jStream);
             twitterStream.listenForTweets(argsPars, Printer::printTweet);
-        } else if (argsPars.getQuery() == null) {
-            try {
-                TwitterUserTimeline.userStream(argsPars);
-            } catch (GetTimelineExeption getTimelineExeption) {
-                getTimelineExeption.printStackTrace();
-            }
         } else {
             try {
                 TwitterQuery twitterQuery = new TwitterQuery(twitter);

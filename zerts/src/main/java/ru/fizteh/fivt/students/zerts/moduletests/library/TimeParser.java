@@ -31,19 +31,19 @@ public class TimeParser {
     };
 
     public static String rightWordPrinting(long goneTime, int mode) {
-        String result = String.valueOf(goneTime) + " ";
+        StringBuilder result = new StringBuilder().append(String.valueOf(goneTime)).append(" ");
         if (goneTime % TEN_MOD >= FIVE || goneTime % TEN_MOD == 0 || (goneTime % HUNDRED_MOD > TEN_MOD
                 && goneTime % HUNDRED_MOD < TWENTY)) {
-            result += WORDS[mode][FIRST_FORM];
+            result.append(WORDS[mode][FIRST_FORM]);
         } else if (goneTime % TEN_MOD == 1) {
-            result += WORDS[mode][SECOND_FORM];
+            result.append(WORDS[mode][SECOND_FORM]);
         } else {
-            result += WORDS[mode][THIRD_FORM];
+            result.append(WORDS[mode][THIRD_FORM]);
         }
         if (mode < RT_MODE) {
-            result += " назад";
+            result.append(" назад");
         }
-        return result;
+        return result.toString();
     }
 
     public static String printGoneDate(Date givenDate) {
@@ -53,19 +53,19 @@ public class TimeParser {
 
     public static String printGoneDate(LocalDateTime givenTime, LocalDateTime nowTime) {
         Duration goneTime = Duration.between(givenTime, nowTime);
-        String result;
+        StringBuilder result = new StringBuilder().append("[");
         if (goneTime.compareTo(JUST_NOW_TIME) < 0) {
-            result = "Только что";
+            result.append("Только что");
         } else if (goneTime.compareTo(Duration.ofHours(1)) < 0) {
-            result = rightWordPrinting(goneTime.toMinutes(), MIN_MODE);
+            result.append(rightWordPrinting(goneTime.toMinutes(), MIN_MODE));
         } else if (givenTime.toLocalDate().equals(nowTime.toLocalDate())) {
-            result = rightWordPrinting(goneTime.toHours(), HOUR_MODE);
+            result.append(rightWordPrinting(goneTime.toHours(), HOUR_MODE));
         } else if (ChronoUnit.DAYS.between(givenTime.toLocalDate(), nowTime.toLocalDate()) == 1) {
-            result = "Вчера";
+            result.append("Вчера");
         } else {
-            result = rightWordPrinting(ChronoUnit.DAYS.between(givenTime.toLocalDate(), nowTime.toLocalDate()),
-                    DAY_MODE);
+            result.append(rightWordPrinting(ChronoUnit.DAYS.between(givenTime.toLocalDate(), nowTime.toLocalDate()),
+                    DAY_MODE));
         }
-        return "[" + result + "] ";
+        return result.append("] ").toString();
     }
 }

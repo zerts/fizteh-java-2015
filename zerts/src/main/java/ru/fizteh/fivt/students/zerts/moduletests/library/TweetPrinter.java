@@ -13,30 +13,30 @@ public class TweetPrinter {
         return printedTweets;
     }
     public static String printTweet(Status tweet, ArgsParser argsPars, boolean streamMode) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         if (tweet.isRetweet() && argsPars.isNoRetweetMode()) {
             return null;
         }
         if (!streamMode) {
             TimeParser timePars = new TimeParser();
-            result += TimeParser.printGoneDate(tweet.getCreatedAt());
+            result.append(TimeParser.printGoneDate(tweet.getCreatedAt()));
         }
         printedTweets++;
-        result += "@" + tweet.getUser().getScreenName() + ": ";
+        result.append("@").append(tweet.getUser().getScreenName()).append(": ");
         String text = tweet.getText();
         if (tweet.isRetweet()) {
             if (argsPars.isNoRetweetMode()) {
                 return "";
             }
-            result += "ретвитнул @" + tweet.getRetweetedStatus().getUser().getScreenName()
-                    + tweet.getRetweetedStatus().getText();
+            result.append("ретвитнул @").append(tweet.getRetweetedStatus().getUser().getScreenName())
+                    .append(tweet.getRetweetedStatus().getText());
         } else {
-            result += tweet.getText();
+            result.append(tweet.getText());
         }
         if (!argsPars.isStreamMode() && !tweet.isRetweet() && tweet.getRetweetCount() != 0) {
-            result += " (" + TimeParser.rightWordPrinting(tweet.getRetweetCount(), RT_MODE) + ")";
+            result.append(" (").append(TimeParser.rightWordPrinting(tweet.getRetweetCount(), RT_MODE)).append(")");
         }
-        result += Printer.printLine();
-        return result;
+        result.append(Printer.printLine());
+        return result.toString();
     }
 }
