@@ -4,9 +4,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Objects;
 
 import static ru.fizteh.fivt.students.zerts.collectionquery.CollectionQuery.Student.student;
+import static ru.fizteh.fivt.students.zerts.collectionquery.OrderByConditions.asc;
 import static ru.fizteh.fivt.students.zerts.collectionquery.Sources.list;
 import static ru.fizteh.fivt.students.zerts.collectionquery.impl.FromStmt.from;
 
@@ -37,15 +37,23 @@ public class CollectionQuery {
                         .selectDistinct(Statistics.class, s -> "all", count(s -> 1), avg(Student::age))
                         .execute();*/
 
+        /*List<Student> ex = new ArrayList<>();
+        ex.add(student("iglina", LocalDate.parse("1986-08-06"), "494"));
+        ex.add(student("kargaltsev", LocalDate.parse("1986-08-06"), "495"));
+        ex.add(student("zertsalov", LocalDate.parse("1986-08-06"), "495"));
+        ex.add(student("ivanov", LocalDate.parse("1986-08-06"), "494"));
+        ex.sort(asc(Student::getGroup));
+        System.out.println(ex);*/
+
         Iterable<Student> statistics =
                 from(list(
-                        student("ivanov", LocalDate.parse("1986-08-06"), "494"),
+                        student("iglina", LocalDate.parse("1986-08-06"), "494"),
+                        student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
                         student("zertsalov", LocalDate.parse("1986-08-06"), "495"),
-                        student("ivanov", LocalDate.parse("1986-08-06"), "494"),
-                        student("zertsalov", LocalDate.parse("1986-08-06"), "495")))
+                        student("ivanov", LocalDate.parse("1986-08-06"), "494")))
                         .select(Student.class, Student::getName, Student::getDateOfBith, Student::getGroup)
-                        .where(s -> Objects.equals(s.getGroup(), "494"))
-                        .limit(2)
+                        .groupBy(Student::getGroup)
+                        .orderBy(asc(Student::getGroup))
                         .execute();
         System.out.println(statistics);
     }

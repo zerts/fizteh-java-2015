@@ -3,9 +3,7 @@ package ru.fizteh.fivt.students.zerts.collectionquery.impl;
 import javafx.util.Pair;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -18,10 +16,12 @@ public class SelectStmt<T, R> {
     private List<Pair<T, Integer>> elements;
 
     private Predicate<T> whereCondition;
-    private Comparator<T>[] comparators;
+    private Comparator<R>[] comparators;
     private Predicate<R> havingCondition;
     private int numberOfObjects;
     private Function<T, ?>[] groupByConditions;
+
+    private CQLComparator<R> cqlComparator;
 
     @SafeVarargs
     public SelectStmt(List<T> elements, Class<R> returnClass, boolean isDistinct, Function<T, ?>... functions) {
@@ -50,8 +50,9 @@ public class SelectStmt<T, R> {
     }
 
     @SafeVarargs
-    public final SelectStmt<T, R> orderBy(Comparator<T>... comparators) {
+    public final SelectStmt<T, R> orderBy(Comparator<R>... comparators) {
         this.comparators = comparators;
+        this.cqlComparator = new CQLComparator<R>(comparators);
         return this;
     }
 
@@ -76,24 +77,51 @@ public class SelectStmt<T, R> {
             elements = filtered;
         }
         if (groupByConditions != null) {
-            throw new UnsupportedOperationException();
+            Map<Object, Integer> mapped = new HashMap<>();
+            String[] results = new String[groupByConditions.length];
+            List<Pair<T, Integer>> grouped = new ArrayList<>();
+            elements.stream().forEach(
+                    element -> {
+                        for (int i = 0; i < groupByConditions.length; i++) {
+                            results[i] = (String) groupByConditions[i].apply(element.getKey());
+                        }
+                        //System.out.println(results[0]);
+                        //System.out.println(mapped);
+                        if (!mapped.containsKey(results[0])) {
+                            mapped.put(results[0], mapped.size());
+                        }
+                        grouped.add(new Pair(element.getKey(), mapped.get(results[0])));
+                    }
+            );
+            elements = grouped;
         }
-        if (comparators != null) {
-            throw new UnsupportedOperationException();
-        }
-        if (numberOfObjects != -1) {
-            while (elements.size() > numberOfObjects) {
-                elements.remove(elements.size() - 1);
-            }
-        }
+        //System.out.println(elements);
         for (Pair<T, Integer> element : this.elements) {
             //System.out.println(element);
             for (int i = 0; i < functions.length; i++) {
                 arguments[i] = functions[i].apply(element.getKey());
                 returnClasses[i] = arguments[i].getClass();
             }
+            @SuppressWarnings("unchecked")
             R newElement = (R) returnClass.getConstructor(returnClasses).newInstance(arguments);
             result.add(newElement);
+        }
+        if (havingCondition != null) {
+            List<R> filtered = new ArrayList<>();
+            result.stream().filter(havingCondition::test).forEach(filtered::add);
+            result = filtered;
+        }
+        if (comparators != null) {
+            result.sort(cqlComparator);
+        }
+        if (isDistinct) {
+            Stream<R> distincted = result.stream().distinct();
+            distincted.forEach(result::add);
+        }
+        if (numberOfObjects != -1) {
+            while (result.size() > numberOfObjects) {
+                result.remove(result.size() - 1);
+            }
         }
         return result;
     }
@@ -105,4 +133,23 @@ public class SelectStmt<T, R> {
     public UnionStmt union() {
         throw new UnsupportedOperationException();
     }
+
+    public class CQLComparator<K> implements Comparator<K> {
+        private Comparator<K>[] comparators;
+        @SafeVarargs
+        public CQLComparator(Comparator<K>... comparators) {
+            this.comparators = comparators;
+        }
+
+        @Override
+        public int compare(K first, K second) {
+            for (Comparator<K> comparator : comparators) {
+                if (comparator.compare(first, second) != 0) {
+                    return comparator.compare(first, second);
+                }
+            }
+            return 0;
+        }
+    }
+
 }
