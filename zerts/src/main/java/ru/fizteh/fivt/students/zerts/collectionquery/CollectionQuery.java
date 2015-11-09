@@ -1,15 +1,12 @@
 package ru.fizteh.fivt.students.zerts.collectionquery;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
-import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.avg;
-import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.count;
 import static ru.fizteh.fivt.students.zerts.collectionquery.CollectionQuery.Student.student;
-import static ru.fizteh.fivt.students.zerts.collectionquery.Conditions.rlike;
-import static ru.fizteh.fivt.students.zerts.collectionquery.OrderByConditions.asc;
-import static ru.fizteh.fivt.students.zerts.collectionquery.OrderByConditions.desc;
 import static ru.fizteh.fivt.students.zerts.collectionquery.Sources.list;
 import static ru.fizteh.fivt.students.zerts.collectionquery.impl.FromStmt.from;
 
@@ -23,8 +20,9 @@ public class CollectionQuery {
      *
      * @param args
      */
-    public static void main(String[] args) {
-        Iterable<Statistics> statistics =
+    public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException,
+            InstantiationException, IllegalAccessException {
+        /*Iterable<Statistics> statistics =
                 from(list(
                         student("ivanov", LocalDate.parse("1986-08-06"), "494"),
                         student("ivanov", LocalDate.parse("1986-08-06"), "494")))
@@ -37,6 +35,17 @@ public class CollectionQuery {
                         .union()
                         .from(list(student("ivanov", LocalDate.parse("1985-08-06"), "494")))
                         .selectDistinct(Statistics.class, s -> "all", count(s -> 1), avg(Student::age))
+                        .execute();*/
+
+        Iterable<Student> statistics =
+                from(list(
+                        student("ivanov", LocalDate.parse("1986-08-06"), "494"),
+                        student("zertsalov", LocalDate.parse("1986-08-06"), "495"),
+                        student("ivanov", LocalDate.parse("1986-08-06"), "494"),
+                        student("zertsalov", LocalDate.parse("1986-08-06"), "495")))
+                        .select(Student.class, Student::getName, Student::getDateOfBith, Student::getGroup)
+                        .where(s -> Objects.equals(s.getGroup(), "494"))
+                        .limit(2)
                         .execute();
         System.out.println(statistics);
     }
@@ -59,6 +68,12 @@ public class CollectionQuery {
             this.group = group;
         }
 
+        public Student(String name, String group) {
+            this.name = name;
+            this.dateOfBith = null;
+            this.group = group;
+        }
+
         public LocalDate getDateOfBith() {
             return dateOfBith;
         }
@@ -73,6 +88,15 @@ public class CollectionQuery {
 
         public static Student student(String name, LocalDate dateOfBith, String group) {
             return new Student(name, dateOfBith, group);
+        }
+
+        @Override
+        public String toString() {
+            return "Statistics{"
+                    + "group='" + group + '\''
+                    + ", name=" + name
+                    + ", dateOfBith=" + dateOfBith
+                    + '}';
         }
     }
 
@@ -99,6 +123,12 @@ public class CollectionQuery {
             this.group = group;
             this.count = count;
             this.age = age;
+        }
+
+        public Statistics(String group) {
+            this.group = group;
+            this.count = (long) 0;
+            this.age = (long) 0;
         }
 
         @Override
