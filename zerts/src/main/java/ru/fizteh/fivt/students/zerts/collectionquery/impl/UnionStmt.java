@@ -1,7 +1,7 @@
 package ru.fizteh.fivt.students.zerts.collectionquery.impl;
 
 /**
- * Created by kormushin on 09.10.15.
+ * Created by Zerts on 09.10.15.
  */
 public class UnionStmt {
 

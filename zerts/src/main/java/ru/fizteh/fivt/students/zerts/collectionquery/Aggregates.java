@@ -2,52 +2,26 @@ package ru.fizteh.fivt.students.zerts.collectionquery;
 
 import ru.fizteh.fivt.students.zerts.collectionquery.aggregatesImpl.Avg;
 import ru.fizteh.fivt.students.zerts.collectionquery.aggregatesImpl.Count;
+import ru.fizteh.fivt.students.zerts.collectionquery.aggregatesImpl.Max;
+import ru.fizteh.fivt.students.zerts.collectionquery.aggregatesImpl.Min;
 
 import java.util.function.Function;
 
-/**
- * Aggregate functions.
- *
- * @author akormushin
- */
 public class Aggregates {
-
-    /**
-     * @param expression
-     * @param <C>
-     * @param <T>
-     * @return
-     */
-    public static <C, T extends Comparable<T>> Function<C, T> max(Function<C, T> expression) {
-        throw new UnsupportedOperationException();
+    public static <T, R extends Comparable> Function<T, R> max(Function<T, R> expression) {
+        return new Max<>(expression);
     }
 
-    /**
-     * @param expression
-     * @param <C>
-     * @param <T>
-     * @return
-     */
     public static <C, T extends Comparable<T>> Function<C, T> min(Function<C, T> expression) {
-        throw new UnsupportedOperationException();
+        return new Min<>(expression);
     }
 
-    /**
-     * @param expression
-     * @param <T>
-     * @return
-     */
     public static <T> Function<T, Integer> count(Function<T, ?> expression) {
-        return new Count<T>(expression);
+        return new Count<>(expression);
     }
 
-    /**
-     * @param expression
-     * @param <T>
-     * @return
-     */
-    public static <T> Function<T, Integer> avg(Function<T, ? extends Number> expression) {
-        return new Avg<T>(expression);
+    public static <T> Function<T, Double> avg(Function<T, ? extends Number> expression) {
+        return new Avg<>(expression);
     }
 
 }

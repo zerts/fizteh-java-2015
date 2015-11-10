@@ -7,6 +7,5 @@ import java.util.function.Function;
  * Created by User on 10.11.2015.
  */
 public interface Aggregator<T, C> extends Function<T, C> {
-    Class getReturnClass();
-    Number apply(List<T> elements);
+    C apply(List<T> elements);
 }

@@ -84,27 +84,20 @@ public class SelectStmt<T, R> {
                         for (int i = 0; i < groupByConditions.length; i++) {
                             results[i] = (String) groupByConditions[i].apply(element);
                         }
-                        //System.out.println(results[0]);
-                        //System.out.println(mapped);
                         if (!mapped.containsKey(Objects.hash(results))) {
                             mapped.put(Objects.hash(results), mapped.size());
                         }
                         grouped.add(new Pair(element, mapped.get(Objects.hash(results))));
                     }
             );
-            //System.out.println(grouped);
-            //System.out.println(mapped.size());
             List<List<T>> groupedElements = new ArrayList<>();
             for (int i = 0; i < mapped.size(); i++) {
                 groupedElements.add(new ArrayList<T>());
             }
 
             for (Pair<T, Integer> element : grouped) {
-                //System.out.println(element.getValue());
                 groupedElements.get(element.getValue()).add(element.getKey());
-                //System.out.println(groupedElements);
             }
-            //System.out.println(groupedElements.size());
             for (List<T> group : groupedElements) {
                 for (int i = 0; i < functions.length; i++) {
                     if (functions[i] instanceof  Aggregator) {
@@ -112,9 +105,6 @@ public class SelectStmt<T, R> {
                     } else {
                         arguments[i] = functions[i].apply(group.get(0));
                     }
-                    System.out.println(group.get(0));
-                    System.out.println(group);
-                    System.out.println(groupedElements);
                     returnClasses[i] = arguments[i].getClass();
                 }
                 @SuppressWarnings("unchecked")
@@ -123,14 +113,18 @@ public class SelectStmt<T, R> {
             }
         } else {
             for (T element : this.elements) {
-                //System.out.println(element);
                 for (int i = 0; i < functions.length; i++) {
                     arguments[i] = functions[i].apply(element);
+                    if (functions[i] instanceof  Aggregator) {
+                        arguments[i] = null;
+                    } else {
+                        arguments[i] = functions[i].apply(element);
+                    }
                     returnClasses[i] = arguments[i].getClass();
                 }
                 @SuppressWarnings("unchecked")
                 R newElement = (R) returnClass.getConstructor(returnClasses).newInstance(arguments);
-                result.add(newElement);
+                    result.add(newElement);
             }
         }
         if (havingCondition != null) {
@@ -138,12 +132,27 @@ public class SelectStmt<T, R> {
             result.stream().filter(havingCondition::test).forEach(filtered::add);
             result = filtered;
         }
+        if (isDistinct) {
+            Set<Integer> hashes = new HashSet<>();
+            List<Integer> flags = new ArrayList<>();
+            for (R element : result) {
+                if (!hashes.contains(element.toString().hashCode())) {
+                    flags.add(1);
+                    hashes.add(element.toString().hashCode());
+                } else {
+                    flags.add(0);
+                }
+            }
+            List<R> distincted = new ArrayList<>();
+            for (int i = 0; i < result.size(); i++) {
+                if (flags.get(i) == 1) {
+                    distincted.add(result.get(i));
+                }
+            }
+            result = distincted;
+        }
         if (comparators != null) {
             result.sort(cqlComparator);
-        }
-        if (isDistinct) {
-            Stream<R> distinctest = result.stream().distinct();
-            distinctest.forEach(result::add);
         }
         if (numberOfObjects != -1) {
             while (result.size() > numberOfObjects) {

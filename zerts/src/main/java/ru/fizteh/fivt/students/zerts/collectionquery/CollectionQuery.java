@@ -5,16 +5,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.avg;
 import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.count;
+import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.min;
 import static ru.fizteh.fivt.students.zerts.collectionquery.CollectionQuery.Student.student;
 import static ru.fizteh.fivt.students.zerts.collectionquery.OrderByConditions.asc;
 import static ru.fizteh.fivt.students.zerts.collectionquery.Sources.list;
 import static ru.fizteh.fivt.students.zerts.collectionquery.impl.FromStmt.from;
 
-/**
- * @author akormushin
- */
 public class CollectionQuery {
 
     /**
@@ -58,12 +55,12 @@ public class CollectionQuery {
                         student("zertsalov", LocalDate.parse("1986-08-06"), "495"),
                         student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
                         student("garkavyy", LocalDate.parse("1986-08-06"), "495"),
-                        student("ivanov", LocalDate.parse("1986-08-06"), "494")))
-                        .select(Statistics.class, Student::getGroup, count(Student::getName), avg(Student::age))
+                        student("ivanov", LocalDate.parse("1989-08-06"), "494")))
+                        .select(Statistics.class, Student::getGroup, count(Student::getName), min(Student::age))
                         .groupBy(Student::getGroup)
                         .orderBy(asc(Statistics::getCount))
                         .execute();
-        System.out.println(statistics);
+        statistics.forEach(System.out::print);
     }
 
 
@@ -155,17 +152,24 @@ public class CollectionQuery {
 
         public Statistics(String group) {
             this.group = group;
-            this.count = 0;
-            this.age = 0.0;
+            this.count = null;
+            this.age = null;
         }
 
         @Override
         public String toString() {
-            return "Statistics{"
-                    + "group='" + group + '\''
-                    + ", count=" + count
-                    + ", age=" + age
-                    + '}';
+            StringBuilder result = new StringBuilder().append("Statistics{");
+            if (group != null) {
+                result.append("group='").append(group).append('\'');
+            }
+            if (count != null) {
+                result.append(", count=").append(count);
+            }
+            if (age != null) {
+                result.append(", age=").append(age);
+            }
+            result.append("}\n");
+            return result.toString();
         }
     }
 

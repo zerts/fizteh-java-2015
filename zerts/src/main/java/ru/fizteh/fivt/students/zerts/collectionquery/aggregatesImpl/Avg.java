@@ -6,16 +6,11 @@ import java.util.function.Function;
 /**
  * Created by User on 10.11.2015.
  */
-public class Avg<T> implements Aggregator<T, Integer> {
+public class Avg<T> implements Aggregator<T, Double> {
 
     private Function<T, ? extends Number> function;
     public Avg(Function<T, ? extends Number> expression) {
         this.function = expression;
-    }
-
-    @Override
-    public Class getReturnClass() {
-        return Integer.class;
     }
 
     @Override
@@ -28,7 +23,7 @@ public class Avg<T> implements Aggregator<T, Integer> {
     }
 
     @Override
-    public Integer apply(T t) {
+    public Double apply(T t) {
         return null;
     }
 }

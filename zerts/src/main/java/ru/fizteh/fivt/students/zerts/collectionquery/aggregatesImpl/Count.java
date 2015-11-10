@@ -25,12 +25,6 @@ public class Count<T> implements Aggregator<T, Integer> {
         }
         return distincted.size();
     }
-
-    @Override
-    public Class getReturnClass() {
-        return Integer.class;
-    }
-
     @Override
     public Integer apply(T t) {
         return null;
