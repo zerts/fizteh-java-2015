@@ -45,7 +45,6 @@ public class SelectStmt<T, R> {
                       boolean isDistinct, Function<T, ?>... functions) {
         this.elements = new ArrayList<>();
         for (T element : elements) {
-            //System.out.println(element.toString());
             this.elements.add(element);
         }
         this.returnClass = returnClass;
@@ -141,7 +140,6 @@ public class SelectStmt<T, R> {
                     } else {
                         arguments[i] = functions[i].apply(element);
                     }
-                    //System.out.println(arguments[1]);
                     returnClasses[i] = arguments[i].getClass();
                 }
                 @SuppressWarnings("unchecked")

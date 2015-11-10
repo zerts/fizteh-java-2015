@@ -17,7 +17,7 @@ public class Max<T, R extends Comparable<R>> implements Aggregator<T, R> {
         }
         T result = elements.get(0);
         for (T element : elements) {
-            if (function.apply(result).compareTo(function.apply(element)) == -1) {
+            if (function.apply(result).compareTo(function.apply(element)) < 0) {
                 result = element;
             }
         }
