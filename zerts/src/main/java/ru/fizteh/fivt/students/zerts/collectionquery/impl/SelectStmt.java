@@ -15,6 +15,7 @@ public class SelectStmt<T, R> {
     private Class returnClass;
     private Function<T, ?>[] functions;
     private List<T> elements;
+    private List<R> pastElements;
 
     private Predicate<T> whereCondition;
     private Comparator<R>[] comparators;
@@ -23,6 +24,7 @@ public class SelectStmt<T, R> {
     private Function<T, ?>[] groupByConditions;
 
     private CQLComparator<R> cqlComparator;
+    private boolean isUnion;
 
     @SafeVarargs
     public SelectStmt(List<T> elements, Class<R> returnClass, boolean isDistinct, Function<T, ?>... functions) {
@@ -35,6 +37,22 @@ public class SelectStmt<T, R> {
         this.isDistinct = isDistinct;
         this.functions = functions;
         this.numberOfObjects = -1;
+        this.isUnion = false;
+    }
+
+    @SafeVarargs
+    public SelectStmt(List<R> pastElements, List<T> elements, Class<R> returnClass, boolean isDistinct, Function<T, ?>... functions) {
+        this.elements = new ArrayList<>();
+        for (T element : elements) {
+            //System.out.println(element.toString());
+            this.elements.add(element);
+        }
+        this.returnClass = returnClass;
+        this.isDistinct = isDistinct;
+        this.functions = functions;
+        this.numberOfObjects = -1;
+        this.isUnion = true;
+        this.pastElements = pastElements;
     }
 
     public SelectStmt<T, R> where(Predicate<T> predicate) {
@@ -159,6 +177,10 @@ public class SelectStmt<T, R> {
                 result.remove(result.size() - 1);
             }
         }
+        if (isUnion) {
+            pastElements.addAll(result);
+            result = pastElements;
+        }
         return result;
     }
 
@@ -166,8 +188,10 @@ public class SelectStmt<T, R> {
         throw new UnsupportedOperationException();
     }
 
-    public UnionStmt union() {
-        throw new UnsupportedOperationException();
+    public UnionStmt<T, R> union() throws InvocationTargetException, NoSuchMethodException,
+            InstantiationException, IllegalAccessException {
+        List<R> result = (List<R>) this.execute();
+        return new UnionStmt(result);
     }
 
     public class CQLComparator<K> implements Comparator<K> {

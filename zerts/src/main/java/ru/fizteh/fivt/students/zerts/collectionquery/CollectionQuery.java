@@ -5,10 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.count;
-import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.min;
 import static ru.fizteh.fivt.students.zerts.collectionquery.CollectionQuery.Student.student;
-import static ru.fizteh.fivt.students.zerts.collectionquery.OrderByConditions.asc;
 import static ru.fizteh.fivt.students.zerts.collectionquery.Sources.list;
 import static ru.fizteh.fivt.students.zerts.collectionquery.impl.FromStmt.from;
 
@@ -46,7 +43,7 @@ public class CollectionQuery {
         ex.sort(asc(Student::getGroup));
         System.out.println(ex);*/
 
-        Iterable<Statistics> statistics =
+        Iterable<Student> statistics =
                 from(list(
                         student("iglina", LocalDate.parse("1986-08-06"), "494"),
                         student("zvereva", LocalDate.parse("1986-08-06"), "494"),
@@ -56,10 +53,13 @@ public class CollectionQuery {
                         student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
                         student("garkavyy", LocalDate.parse("1986-08-06"), "495"),
                         student("ivanov", LocalDate.parse("1989-08-06"), "494")))
-                        .select(Statistics.class, Student::getGroup, count(Student::getName), min(Student::age))
-                        .groupBy(Student::getGroup)
-                        .orderBy(asc(Statistics::getCount))
-                        .execute();
+                        .select(Student.class, Student::getName, Student::getGroup)
+                        .union()
+                        .from(list(student("iglina", LocalDate.parse("1986-08-06"), "494"),
+                                student("zvereva", LocalDate.parse("1986-08-06"), "494"),
+                                student("iglina", LocalDate.parse("1986-08-06"), "494")))
+                                .select(Student.class, Student::getName, Student::getGroup)
+                                .execute();
         statistics.forEach(System.out::print);
     }
 
@@ -111,12 +111,28 @@ public class CollectionQuery {
 
         @Override
         public String toString() {
+            StringBuilder result = new StringBuilder().append("Student{");
+            if (group != null) {
+                result.append("group='").append(group).append('\'');
+            }
+            if (name != null) {
+                result.append(", name=").append(name);
+            }
+            if (dateOfBith != null) {
+                result.append(", age=").append(dateOfBith);
+            }
+            result.append("}\n");
+            return result.toString();
+        }
+
+        /*@Override
+        public String toString() {
             return "Statistics{"
                     + "group='" + group + '\''
                     + ", name=" + name
                     + ", dateOfBith=" + dateOfBith
                     + '}';
-        }
+        }*/
     }
 
 

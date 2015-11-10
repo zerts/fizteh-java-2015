@@ -19,7 +19,7 @@ public class Conditions<T> {
      * @return
      */
     public static <T> Predicate<T> rlike(Function<T, String> expression, String regexp) {
-        throw new UnsupportedOperationException();
+        return element -> expression.apply(element).matches(regexp);
     }
 
     /**
