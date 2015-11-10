@@ -1,5 +1,6 @@
 package ru.fizteh.fivt.students.zerts.collectionquery;
 
+import ru.fizteh.fivt.students.zerts.collectionquery.aggregatesImpl.Avg;
 import ru.fizteh.fivt.students.zerts.collectionquery.aggregatesImpl.Count;
 
 import java.util.function.Function;
@@ -42,12 +43,11 @@ public class Aggregates {
 
     /**
      * @param expression
-     * @param <C>
      * @param <T>
      * @return
      */
-    public static <C, T extends Comparable<T>> Function<C, T> avg(Function<C, T> expression) {
-        throw new UnsupportedOperationException();
+    public static <T> Function<T, Integer> avg(Function<T, ? extends Number> expression) {
+        return new Avg<T>(expression);
     }
 
 }

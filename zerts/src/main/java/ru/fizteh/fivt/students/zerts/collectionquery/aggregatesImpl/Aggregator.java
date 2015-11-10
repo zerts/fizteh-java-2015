@@ -8,5 +8,5 @@ import java.util.function.Function;
  */
 public interface Aggregator<T, C> extends Function<T, C> {
     Class getReturnClass();
-    Integer apply(List<T> elements);
+    Number apply(List<T> elements);
 }

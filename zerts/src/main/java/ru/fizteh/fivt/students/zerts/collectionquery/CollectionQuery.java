@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
+import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.avg;
 import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.count;
 import static ru.fizteh.fivt.students.zerts.collectionquery.CollectionQuery.Student.student;
 import static ru.fizteh.fivt.students.zerts.collectionquery.OrderByConditions.asc;
@@ -52,13 +53,13 @@ public class CollectionQuery {
                 from(list(
                         student("iglina", LocalDate.parse("1986-08-06"), "494"),
                         student("zvereva", LocalDate.parse("1986-08-06"), "494"),
-                        student("zuev", LocalDate.parse("1986-08-06"), "494"),
+                        student("zuev", LocalDate.parse("1976-08-06"), "494"),
                         student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
                         student("zertsalov", LocalDate.parse("1986-08-06"), "495"),
                         student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
                         student("garkavyy", LocalDate.parse("1986-08-06"), "495"),
                         student("ivanov", LocalDate.parse("1986-08-06"), "494")))
-                        .select(Statistics.class, Student::getGroup, count(Student::getName))
+                        .select(Statistics.class, Student::getGroup, count(Student::getName), avg(Student::age))
                         .groupBy(Student::getGroup)
                         .orderBy(asc(Statistics::getCount))
                         .execute();
@@ -103,8 +104,8 @@ public class CollectionQuery {
             return group;
         }
 
-        public long age() {
-            return ChronoUnit.YEARS.between(getDateOfBith(), LocalDateTime.now());
+        public Double age() {
+            return (double) ChronoUnit.YEARS.between(getDateOfBith(), LocalDateTime.now());
         }
 
         public static Student student(String name, LocalDate dateOfBith, String group) {
@@ -126,7 +127,7 @@ public class CollectionQuery {
 
         private final String group;
         private final Integer count;
-        private final Integer age;
+        private final Double age;
 
         public String getGroup() {
             return group;
@@ -136,7 +137,7 @@ public class CollectionQuery {
             return count;
         }
 
-        public Integer getAge() {
+        public Double getAge() {
             return age;
         }
 
@@ -146,7 +147,7 @@ public class CollectionQuery {
             this.age = null;
         }
 
-        public Statistics(String group, Integer count, Integer age) {
+        public Statistics(String group, Integer count, Double age) {
             this.group = group;
             this.count = count;
             this.age = age;
@@ -154,8 +155,8 @@ public class CollectionQuery {
 
         public Statistics(String group) {
             this.group = group;
-            this.count = (Integer) 0;
-            this.age = (Integer) 0;
+            this.count = 0;
+            this.age = 0.0;
         }
 
         @Override
