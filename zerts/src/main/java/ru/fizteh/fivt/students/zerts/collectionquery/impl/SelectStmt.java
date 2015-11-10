@@ -1,6 +1,7 @@
 package ru.fizteh.fivt.students.zerts.collectionquery.impl;
 
 import javafx.util.Pair;
+import ru.fizteh.fivt.students.zerts.collectionquery.aggregatesImpl.Aggregator;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -13,7 +14,7 @@ public class SelectStmt<T, R> {
     private boolean isDistinct;
     private Class returnClass;
     private Function<T, ?>[] functions;
-    private List<Pair<T, Integer>> elements;
+    private List<T> elements;
 
     private Predicate<T> whereCondition;
     private Comparator<R>[] comparators;
@@ -25,12 +26,10 @@ public class SelectStmt<T, R> {
 
     @SafeVarargs
     public SelectStmt(List<T> elements, Class<R> returnClass, boolean isDistinct, Function<T, ?>... functions) {
-        Integer curr = 0;
         this.elements = new ArrayList<>();
         for (T element : elements) {
             //System.out.println(element.toString());
-            this.elements.add(new Pair<T, Integer>(element, curr));
-            curr++;
+            this.elements.add(element);
         }
         this.returnClass = returnClass;
         this.isDistinct = isDistinct;
@@ -72,39 +71,67 @@ public class SelectStmt<T, R> {
         Object[] arguments = new Object[functions.length];
         Class[] returnClasses = new Class[functions.length];
         if (whereCondition != null) {
-            List<Pair<T, Integer>> filtered = new ArrayList<>();
-            elements.stream().filter(element -> whereCondition.test(element.getKey())).forEach(filtered::add);
+            List<T> filtered = new ArrayList<>();
+            elements.stream().filter(whereCondition::test).forEach(filtered::add);
             elements = filtered;
         }
         if (groupByConditions != null) {
-            Map<Object, Integer> mapped = new HashMap<>();
+            Map<Integer, Integer> mapped = new HashMap<>();
             String[] results = new String[groupByConditions.length];
             List<Pair<T, Integer>> grouped = new ArrayList<>();
             elements.stream().forEach(
                     element -> {
                         for (int i = 0; i < groupByConditions.length; i++) {
-                            results[i] = (String) groupByConditions[i].apply(element.getKey());
+                            results[i] = (String) groupByConditions[i].apply(element);
                         }
                         //System.out.println(results[0]);
                         //System.out.println(mapped);
-                        if (!mapped.containsKey(results[0])) {
-                            mapped.put(results[0], mapped.size());
+                        if (!mapped.containsKey(Objects.hash(results))) {
+                            mapped.put(Objects.hash(results), mapped.size());
                         }
-                        grouped.add(new Pair(element.getKey(), mapped.get(results[0])));
+                        grouped.add(new Pair(element, mapped.get(Objects.hash(results))));
                     }
             );
-            elements = grouped;
-        }
-        //System.out.println(elements);
-        for (Pair<T, Integer> element : this.elements) {
-            //System.out.println(element);
-            for (int i = 0; i < functions.length; i++) {
-                arguments[i] = functions[i].apply(element.getKey());
-                returnClasses[i] = arguments[i].getClass();
+            //System.out.println(grouped);
+            //System.out.println(mapped.size());
+            List<List<T>> groupedElements = new ArrayList<>();
+            for (int i = 0; i < mapped.size(); i++) {
+                groupedElements.add(new ArrayList<T>());
             }
-            @SuppressWarnings("unchecked")
-            R newElement = (R) returnClass.getConstructor(returnClasses).newInstance(arguments);
-            result.add(newElement);
+
+            for (Pair<T, Integer> element : grouped) {
+                //System.out.println(element.getValue());
+                groupedElements.get(element.getValue()).add(element.getKey());
+                //System.out.println(groupedElements);
+            }
+            //System.out.println(groupedElements.size());
+            for (List<T> group : groupedElements) {
+                for (int i = 0; i < functions.length; i++) {
+                    if (functions[i] instanceof  Aggregator) {
+                        arguments[i] = ((Aggregator) functions[i]).apply(group);
+                    } else {
+                        arguments[i] = functions[i].apply(group.get(0));
+                    }
+                    System.out.println(group.get(0));
+                    System.out.println(group);
+                    System.out.println(groupedElements);
+                    returnClasses[i] = arguments[i].getClass();
+                }
+                @SuppressWarnings("unchecked")
+                R newElement = (R) returnClass.getConstructor(returnClasses).newInstance(arguments);
+                result.add(newElement);
+            }
+        } else {
+            for (T element : this.elements) {
+                //System.out.println(element);
+                for (int i = 0; i < functions.length; i++) {
+                    arguments[i] = functions[i].apply(element);
+                    returnClasses[i] = arguments[i].getClass();
+                }
+                @SuppressWarnings("unchecked")
+                R newElement = (R) returnClass.getConstructor(returnClasses).newInstance(arguments);
+                result.add(newElement);
+            }
         }
         if (havingCondition != null) {
             List<R> filtered = new ArrayList<>();
@@ -115,8 +142,8 @@ public class SelectStmt<T, R> {
             result.sort(cqlComparator);
         }
         if (isDistinct) {
-            Stream<R> distincted = result.stream().distinct();
-            distincted.forEach(result::add);
+            Stream<R> distinctest = result.stream().distinct();
+            distinctest.forEach(result::add);
         }
         if (numberOfObjects != -1) {
             while (result.size() > numberOfObjects) {

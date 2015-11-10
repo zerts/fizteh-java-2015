@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
+import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.count;
 import static ru.fizteh.fivt.students.zerts.collectionquery.CollectionQuery.Student.student;
 import static ru.fizteh.fivt.students.zerts.collectionquery.OrderByConditions.asc;
 import static ru.fizteh.fivt.students.zerts.collectionquery.Sources.list;
@@ -24,18 +25,20 @@ public class CollectionQuery {
             InstantiationException, IllegalAccessException {
         /*Iterable<Statistics> statistics =
                 from(list(
-                        student("ivanov", LocalDate.parse("1986-08-06"), "494"),
+                        student("iglina", LocalDate.parse("1986-08-06"), "494"),
+                        student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
+                        student("zertsalov", LocalDate.parse("1986-08-06"), "495"),
                         student("ivanov", LocalDate.parse("1986-08-06"), "494")))
                         .select(Statistics.class, Student::getGroup, count(Student::getGroup), avg(Student::age))
-                        .where(rlike(Student::getName, ".*ov").and(s -> s.age() > 20))
+                        //.where(rlike(Student::getName, ".*ov").and(s -> s.age() > 20))
                         .groupBy(Student::getName)
-                        .having(s -> s.getCount() > 0)
-                        .orderBy(asc(Student::getGroup), desc(count(Student::getGroup)))
-                        .limit(100)
+                        //.having(s -> s.getCount() > 0)
+                        //.orderBy(asc(Student::getGroup), desc(count(Student::getGroup)))
+                        /*.limit(100)
                         .union()
                         .from(list(student("ivanov", LocalDate.parse("1985-08-06"), "494")))
-                        .selectDistinct(Statistics.class, s -> "all", count(s -> 1), avg(Student::age))
-                        .execute();*/
+                        .selectDistinct(Statistics.class, s -> "all", count(s -> 1), avg(Student::age))*/
+                        /*.execute();*/
 
         /*List<Student> ex = new ArrayList<>();
         ex.add(student("iglina", LocalDate.parse("1986-08-06"), "494"));
@@ -45,15 +48,19 @@ public class CollectionQuery {
         ex.sort(asc(Student::getGroup));
         System.out.println(ex);*/
 
-        Iterable<Student> statistics =
+        Iterable<Statistics> statistics =
                 from(list(
                         student("iglina", LocalDate.parse("1986-08-06"), "494"),
+                        student("zvereva", LocalDate.parse("1986-08-06"), "494"),
+                        student("zuev", LocalDate.parse("1986-08-06"), "494"),
                         student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
                         student("zertsalov", LocalDate.parse("1986-08-06"), "495"),
+                        student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
+                        student("garkavyy", LocalDate.parse("1986-08-06"), "495"),
                         student("ivanov", LocalDate.parse("1986-08-06"), "494")))
-                        .select(Student.class, Student::getName, Student::getDateOfBith, Student::getGroup)
+                        .select(Statistics.class, Student::getGroup, count(Student::getName))
                         .groupBy(Student::getGroup)
-                        .orderBy(asc(Student::getGroup))
+                        .orderBy(asc(Statistics::getCount))
                         .execute();
         System.out.println(statistics);
     }
@@ -68,6 +75,12 @@ public class CollectionQuery {
 
         public String getName() {
             return name;
+        }
+
+        public Student(String group) {
+            this.name = null;
+            this.dateOfBith = null;
+            this.group = group;
         }
 
         public Student(String name, LocalDate dateOfBith, String group) {
@@ -112,22 +125,28 @@ public class CollectionQuery {
     public static class Statistics {
 
         private final String group;
-        private final Long count;
-        private final Long age;
+        private final Integer count;
+        private final Integer age;
 
         public String getGroup() {
             return group;
         }
 
-        public Long getCount() {
+        public Integer getCount() {
             return count;
         }
 
-        public Long getAge() {
+        public Integer getAge() {
             return age;
         }
 
-        public Statistics(String group, Long count, Long age) {
+        public Statistics(String group, Integer count) {
+            this.group = group;
+            this.count = count;
+            this.age = null;
+        }
+
+        public Statistics(String group, Integer count, Integer age) {
             this.group = group;
             this.count = count;
             this.age = age;
@@ -135,8 +154,8 @@ public class CollectionQuery {
 
         public Statistics(String group) {
             this.group = group;
-            this.count = (long) 0;
-            this.age = (long) 0;
+            this.count = (Integer) 0;
+            this.age = (Integer) 0;
         }
 
         @Override
