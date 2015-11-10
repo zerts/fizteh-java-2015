@@ -41,7 +41,8 @@ public class SelectStmt<T, R> {
     }
 
     @SafeVarargs
-    public SelectStmt(List<R> pastElements, List<T> elements, Class<R> returnClass, boolean isDistinct, Function<T, ?>... functions) {
+    public SelectStmt(List<R> pastElements, List<T> elements, Class<R> returnClass,
+                      boolean isDistinct, Function<T, ?>... functions) {
         this.elements = new ArrayList<>();
         for (T element : elements) {
             //System.out.println(element.toString());
@@ -134,10 +135,13 @@ public class SelectStmt<T, R> {
                 for (int i = 0; i < functions.length; i++) {
                     arguments[i] = functions[i].apply(element);
                     if (functions[i] instanceof  Aggregator) {
-                        arguments[i] = null;
+                        List<T> currArg = new ArrayList<>();
+                        currArg.add(element);
+                        arguments[i] = ((Aggregator) functions[i]).apply(currArg);
                     } else {
                         arguments[i] = functions[i].apply(element);
                     }
+                    //System.out.println(arguments[1]);
                     returnClasses[i] = arguments[i].getClass();
                 }
                 @SuppressWarnings("unchecked")

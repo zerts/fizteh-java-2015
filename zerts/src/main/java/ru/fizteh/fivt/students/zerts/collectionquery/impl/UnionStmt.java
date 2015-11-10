@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-/**
- * Created by Zerts on 09.10.15.
- */
 public class UnionStmt<T, R> {
     private List<R> pastElements = new ArrayList<>();
     private List<T> elements = new ArrayList<>();
@@ -31,7 +28,8 @@ public class UnionStmt<T, R> {
     }
 
 
-     public SelectStmt<T, R> select(Class<R> returnClass, Function<T, ?>... functions) {
+     @SafeVarargs
+     public final SelectStmt<T, R> select(Class<R> returnClass, Function<T, ?>... functions) {
         return new SelectStmt<T, R>((List<R>) pastElements, elements, returnClass, false, functions);
     }
 

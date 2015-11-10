@@ -3,9 +3,6 @@ package ru.fizteh.fivt.students.zerts.collectionquery.aggregatesImpl;
 import java.util.List;
 import java.util.function.Function;
 
-/**
- * Created by User on 11.11.2015.
- */
 public class Min<T, R extends Comparable<R>> implements Aggregator<T, R> {
 
     private Function<T, R> function;

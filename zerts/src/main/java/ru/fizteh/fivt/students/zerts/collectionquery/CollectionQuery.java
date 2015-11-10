@@ -5,7 +5,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
+import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.avg;
+import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.count;
 import static ru.fizteh.fivt.students.zerts.collectionquery.CollectionQuery.Student.student;
+import static ru.fizteh.fivt.students.zerts.collectionquery.Conditions.rlike;
+import static ru.fizteh.fivt.students.zerts.collectionquery.OrderByConditions.asc;
+import static ru.fizteh.fivt.students.zerts.collectionquery.OrderByConditions.desc;
 import static ru.fizteh.fivt.students.zerts.collectionquery.Sources.list;
 import static ru.fizteh.fivt.students.zerts.collectionquery.impl.FromStmt.from;
 
@@ -18,22 +23,22 @@ public class CollectionQuery {
      */
     public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException,
             InstantiationException, IllegalAccessException {
-        /*Iterable<Statistics> statistics =
+        Iterable<Statistics> statistics =
                 from(list(
                         student("iglina", LocalDate.parse("1986-08-06"), "494"),
                         student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
                         student("zertsalov", LocalDate.parse("1986-08-06"), "495"),
                         student("ivanov", LocalDate.parse("1986-08-06"), "494")))
                         .select(Statistics.class, Student::getGroup, count(Student::getGroup), avg(Student::age))
-                        //.where(rlike(Student::getName, ".*ov").and(s -> s.age() > 20))
+                        .where(rlike(Student::getName, ".*ov").and(s -> s.age() > 20))
                         .groupBy(Student::getName)
-                        //.having(s -> s.getCount() > 0)
-                        //.orderBy(asc(Student::getGroup), desc(count(Student::getGroup)))
-                        /*.limit(100)
+                        .having(s -> s.getCount() > 0)
+                        .orderBy(asc(Statistics::getGroup), desc(count(Statistics::getGroup)))
+                        .limit(100)
                         .union()
                         .from(list(student("ivanov", LocalDate.parse("1985-08-06"), "494")))
-                        .selectDistinct(Statistics.class, s -> "all", count(s -> 1), avg(Student::age))*/
-                        /*.execute();*/
+                        .selectDistinct(Statistics.class, s -> "all", count(s -> 1), avg(Student::age))
+                        .execute();
 
         /*List<Student> ex = new ArrayList<>();
         ex.add(student("iglina", LocalDate.parse("1986-08-06"), "494"));
@@ -43,7 +48,7 @@ public class CollectionQuery {
         ex.sort(asc(Student::getGroup));
         System.out.println(ex);*/
 
-        Iterable<Student> statistics =
+        /*Iterable<Student> statistics =
                 from(list(
                         student("iglina", LocalDate.parse("1986-08-06"), "494"),
                         student("zvereva", LocalDate.parse("1986-08-06"), "494"),
@@ -59,7 +64,7 @@ public class CollectionQuery {
                                 student("zvereva", LocalDate.parse("1986-08-06"), "494"),
                                 student("iglina", LocalDate.parse("1986-08-06"), "494")))
                                 .select(Student.class, Student::getName, Student::getGroup)
-                                .execute();
+                                .execute();*/
         statistics.forEach(System.out::print);
     }
 
