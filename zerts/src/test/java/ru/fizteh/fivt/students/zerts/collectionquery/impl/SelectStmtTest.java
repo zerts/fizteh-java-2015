@@ -48,7 +48,7 @@ public class SelectStmtTest extends TestCase {
         student = new CollectionQuery.Student("zertsalov", LocalDate.parse("1996-10-29"), "495");
         select = FromStmt.from(exampleList).select(CollectionQuery.Student.class, CollectionQuery.Student::getName,
                 CollectionQuery.Student::getGroup);
-        distinctSelect = FromStmt.from(distinctExampleList).select(CollectionQuery.Student.class,
+        distinctSelect = FromStmt.from(distinctExampleList).selectDistinct(CollectionQuery.Student.class,
                 CollectionQuery.Student::getName, CollectionQuery.Student::getGroup);
         groupSelect = FromStmt.from(exampleList).select(CollectionQuery.Statistics.class,
                 CollectionQuery.Student::getGroup, Aggregates.count(CollectionQuery.Student::getName));
@@ -150,6 +150,17 @@ public class SelectStmtTest extends TestCase {
         for (int i = 0; i < resultList.size(); i++) {
             assertEquals(resultList.get(i).toString(), result.get(i).toString());
         }
+
+        List<CollectionQuery.Statistics> resultWithAggr = (List<CollectionQuery.Statistics>) groupSelect.execute();
+        List<CollectionQuery.Statistics> resultListWithAggr = new ArrayList<>();
+        resultListWithAggr.add(new CollectionQuery.Statistics("495", 1));
+        resultListWithAggr.add(new CollectionQuery.Statistics("494", 1));
+        resultListWithAggr.add(new CollectionQuery.Statistics("495", 1));
+        resultListWithAggr.add(new CollectionQuery.Statistics("495", 1));
+        assertEquals(resultWithAggr.size(), resultListWithAggr.size());
+        for (int i = 0; i < resultWithAggr.size(); i++) {
+            assertEquals(resultListWithAggr.get(i).toString(), resultWithAggr.get(i).toString());
+        }
     }
 
     @Test
@@ -174,7 +185,9 @@ public class SelectStmtTest extends TestCase {
         }
     }
 
+    @Test
     public void testIsDistinct() throws Exception {
+        //System.out.println(distinctSelect.isDistinct());
         List<CollectionQuery.Student> result = (List<CollectionQuery.Student>) distinctSelect.execute();
         List<CollectionQuery.Student> resultList = new ArrayList<>();
         resultList.add(new CollectionQuery.Student("garkaviy", "495"));

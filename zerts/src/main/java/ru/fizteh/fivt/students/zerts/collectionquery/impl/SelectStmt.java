@@ -211,6 +211,7 @@ public class SelectStmt<T, R> {
             pastElements.addAll(result);
             result = pastElements;
         }
+        //System.out.println("Hello!");
         return result;
     }
 
