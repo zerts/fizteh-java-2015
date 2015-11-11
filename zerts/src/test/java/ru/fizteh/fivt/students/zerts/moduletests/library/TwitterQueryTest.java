@@ -79,7 +79,20 @@ public class TwitterQueryTest extends TestCase {
         assertThat(tweets.size(), is(100));
         long daysGone = 9 + ChronoUnit.DAYS.between(LocalDateTime.of(2015, Month.OCTOBER, 30, 19, 20).toLocalDate(),
                 LocalDateTime.now().toLocalDate());
-        assertThat(tweets, hasItems("[" + daysGone + " день назад] @Owl_Juliann_: We are here! "
+        StringBuilder result = new StringBuilder().append(" ");
+        int TEN_MOD = 10;
+        int FIVE = 5;
+        int HUNDRED_MOD = 100;
+        int TWENTY = 20;
+        if (daysGone % TEN_MOD >= FIVE || daysGone % TEN_MOD == 0 || (daysGone % HUNDRED_MOD > TEN_MOD
+                && daysGone % HUNDRED_MOD < TWENTY)) {
+            result.append("дней");
+        } else if (daysGone % TEN_MOD == 1) {
+            result.append("день");
+        } else {
+            result.append("дня");
+        }
+        assertThat(tweets, hasItems("[" + daysGone + result.toString() + " назад] @Owl_Juliann_: We are here! "
                 + "https://t.co/nenvrVtV0o\n---------------------------------------------------"
                 + "----------------------------------------------------------------------------"
                 + "-------------------------------------------\n"));
