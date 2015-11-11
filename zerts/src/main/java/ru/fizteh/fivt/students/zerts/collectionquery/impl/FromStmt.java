@@ -5,9 +5,13 @@ import java.util.List;
 import java.util.function.Function;
 
 public class FromStmt<T> {
+    public List<T> getElements() {
+        return elements;
+    }
+
     private List<T> elements = new ArrayList<T>();
 
-    protected FromStmt(Iterable<T> iterable) {
+    public FromStmt(Iterable<T> iterable) {
         for (T curr : iterable) {
             elements.add(curr);
         }

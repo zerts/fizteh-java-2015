@@ -38,7 +38,11 @@ public class FromStmtTest extends TestCase {
 
     @Test
     public void testFrom() throws Exception {
-
+        FromStmt<CollectionQuery.Student> fromStmt = FromStmt.from(exampleList);
+        assertEquals(fromStmt.getElements().size(), exampleList.size());
+        for (int i = 0; i < exampleList.size(); i++) {
+            assertEquals(fromStmt.getElements().get(i), exampleList.get(i));
+        }
     }
 
     @Test
