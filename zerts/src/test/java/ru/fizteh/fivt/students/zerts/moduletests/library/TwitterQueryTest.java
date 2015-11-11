@@ -12,6 +12,9 @@ import org.powermock.api.mockito.PowerMockito;
 import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.SearchTweetExeption;
 import twitter4j.*;
 
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 
@@ -74,9 +77,12 @@ public class TwitterQueryTest extends TestCase {
 
         //System.out.println(tweets.size());
         assertThat(tweets.size(), is(100));
-        assertThat(tweets, hasItems("[8 дней назад] @Owl_Juliann_: We are here! https://t.co/nenvrVtV0o\n--------"
-                + "----------------------------------------------------------------------------------------"
-                + "--------------------------------------------------------------------------\n"));
+        long daysGone = 9 + ChronoUnit.DAYS.between(LocalDateTime.of(2015, Month.OCTOBER, 30, 19, 20).toLocalDate(),
+                LocalDateTime.now().toLocalDate());
+        assertThat(tweets, hasItems("[" + daysGone + " день назад] @Owl_Juliann_: We are here! "
+                + "https://t.co/nenvrVtV0o\n---------------------------------------------------"
+                + "----------------------------------------------------------------------------"
+                + "-------------------------------------------\n"));
 
     }
 
