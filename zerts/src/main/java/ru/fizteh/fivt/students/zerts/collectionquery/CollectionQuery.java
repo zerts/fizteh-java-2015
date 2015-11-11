@@ -80,11 +80,11 @@ public class CollectionQuery {
             return name;
         }
 
-        public Student(String group) {
+        /*public Student(String group) {
             this.name = null;
             this.dateOfBith = null;
             this.group = group;
-        }
+        }*/
 
         public Student(String name, LocalDate dateOfBith, String group) {
             this.name = name;
@@ -129,15 +129,6 @@ public class CollectionQuery {
             result.append("}\n");
             return result.toString();
         }
-
-        /*@Override
-        public String toString() {
-            return "Statistics{"
-                    + "group='" + group + '\''
-                    + ", name=" + name
-                    + ", dateOfBith=" + dateOfBith
-                    + '}';
-        }*/
     }
 
 
@@ -165,7 +156,7 @@ public class CollectionQuery {
             this.age = null;
         }
 
-        public Statistics(String group, Integer count, Double age) {
+        /*public Statistics(String group, Integer count, Double age) {
             this.group = group;
             this.count = count;
             this.age = age;
@@ -175,7 +166,7 @@ public class CollectionQuery {
             this.group = group;
             this.count = null;
             this.age = null;
-        }
+        }*/
 
         @Override
         public String toString() {

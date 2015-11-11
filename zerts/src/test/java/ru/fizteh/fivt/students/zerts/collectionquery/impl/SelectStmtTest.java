@@ -187,7 +187,6 @@ public class SelectStmtTest extends TestCase {
 
     @Test
     public void testIsDistinct() throws Exception {
-        //System.out.println(distinctSelect.isDistinct());
         List<CollectionQuery.Student> result = (List<CollectionQuery.Student>) distinctSelect.execute();
         List<CollectionQuery.Student> resultList = new ArrayList<>();
         resultList.add(new CollectionQuery.Student("garkaviy", "495"));
