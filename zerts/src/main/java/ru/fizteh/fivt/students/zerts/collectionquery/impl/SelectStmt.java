@@ -7,7 +7,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class SelectStmt<T, R> {
 
@@ -213,10 +212,6 @@ public class SelectStmt<T, R> {
             result = pastElements;
         }
         return result;
-    }
-
-    public Stream<R> stream() {
-        throw new UnsupportedOperationException();
     }
 
     public UnionStmt<T, R> union() throws InvocationTargetException, NoSuchMethodException,
