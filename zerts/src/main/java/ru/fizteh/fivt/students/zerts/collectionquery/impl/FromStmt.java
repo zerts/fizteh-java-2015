@@ -3,7 +3,6 @@ package ru.fizteh.fivt.students.zerts.collectionquery.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 public class FromStmt<T> {
     private List<T> elements = new ArrayList<T>();
@@ -16,10 +15,6 @@ public class FromStmt<T> {
 
     public static <T> FromStmt<T> from(Iterable<T> iterable) {
         return new FromStmt<>(iterable);
-    }
-
-    public static <T> FromStmt<T> from(Stream<T> stream) {
-        throw new UnsupportedOperationException();
     }
 
     @SafeVarargs
