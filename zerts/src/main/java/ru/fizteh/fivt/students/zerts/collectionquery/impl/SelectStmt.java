@@ -11,10 +11,39 @@ import java.util.stream.Stream;
 
 public class SelectStmt<T, R> {
 
+    public boolean isDistinct() {
+        return isDistinct;
+    }
+
+    public Function<T, ?>[] getFunctions() {
+        return functions;
+    }
+
+    public Class getReturnClass() {
+        return returnClass;
+    }
+
+    public int getNumberOfObjects() {
+        return numberOfObjects;
+    }
+
+    public boolean isUnion() {
+        return isUnion;
+    }
+
+    public List<T> getElements() {
+        return elements;
+    }
+
     private boolean isDistinct;
     private Class returnClass;
     private Function<T, ?>[] functions;
     private List<T> elements;
+
+    public List<R> getPastElements() {
+        return pastElements;
+    }
+
     private List<R> pastElements;
 
     private Predicate<T> whereCondition;

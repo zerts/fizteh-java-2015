@@ -16,11 +16,10 @@ import java.util.function.Function;
  * Created by User on 11.11.2015.
  */
 
-@SuppressWarnings("unchecked")
 @RunWith(MockitoJUnitRunner.class)
-public class FromStmtTest extends TestCase {
+public class UnionStmtTest extends TestCase {
 
-    List<CollectionQuery.Student> exampleList, emptyExampleList;
+    List<CollectionQuery.Student> exampleList, emptyExampleList, pastExampleList;
     Function<CollectionQuery.Student, Double> functionAge;
     Function<CollectionQuery.Student, String> functionName, functionGroup;
     CollectionQuery.Student student;
@@ -29,9 +28,11 @@ public class FromStmtTest extends TestCase {
     public void setUp() throws Exception {
         exampleList = new ArrayList<>();
         emptyExampleList = new ArrayList<>();
+        pastExampleList = new ArrayList<>();
         exampleList.add(new CollectionQuery.Student("iglina", LocalDate.parse("1996-08-06"), "494"));
         exampleList.add(new CollectionQuery.Student("kargaltsev", LocalDate.parse("1997-02-20"), "495"));
         exampleList.add(new CollectionQuery.Student("zertsalov", LocalDate.parse("1996-10-29"), "495"));
+        pastExampleList.add(new CollectionQuery.Student("iglina", LocalDate.parse("1996-08-06"), "494"));
         functionAge = CollectionQuery.Student::age;
         functionName = CollectionQuery.Student::getName;
         functionGroup = CollectionQuery.Student::getGroup;
@@ -40,22 +41,29 @@ public class FromStmtTest extends TestCase {
 
     @Test
     public void testFrom() throws Exception {
-        FromStmt<CollectionQuery.Student> fromStmt = FromStmt.from(exampleList);
-        assertEquals(fromStmt.getElements().size(), exampleList.size());
+        UnionStmt<CollectionQuery.Student, CollectionQuery.Student> unionStmt = new UnionStmt(exampleList);
+        unionStmt = unionStmt.from(exampleList);
+        assertEquals(unionStmt.getElements().size(), exampleList.size());
         for (int i = 0; i < exampleList.size(); i++) {
-            assertEquals(fromStmt.getElements().get(i), exampleList.get(i));
+            assertEquals(unionStmt.getElements().get(i), exampleList.get(i));
+        }
+
+        assertEquals(unionStmt.getPastElements().size(), exampleList.size());
+        for (int i = 0; i < exampleList.size(); i++) {
+            assertEquals(unionStmt.getPastElements().get(i), exampleList.get(i));
         }
     }
 
     @Test
     public void testSelect() throws Exception {
-        SelectStmt<CollectionQuery.Student, CollectionQuery.Student> select = FromStmt.from(exampleList)
+        UnionStmt<CollectionQuery.Student, CollectionQuery.Student> unionStmt = new UnionStmt(pastExampleList);
+        SelectStmt<CollectionQuery.Student, CollectionQuery.Student> select = unionStmt.from(exampleList)
                 .select(CollectionQuery.Student.class, CollectionQuery.Student::getName,
                         CollectionQuery.Student::getGroup);
         assertEquals(select.getNumberOfObjects(), -1);
         assertEquals(select.getReturnClass(), CollectionQuery.Student.class);
         assertEquals(select.isDistinct(), false);
-        assertEquals(select.isUnion(), false);
+        assertEquals(select.isUnion(), true);
         Function<CollectionQuery.Student, String>[] functions = new Function[2];
         functions[0] = CollectionQuery.Student::getName;
         functions[1] = CollectionQuery.Student::getGroup;
@@ -69,18 +77,23 @@ public class FromStmtTest extends TestCase {
         assertEquals(exampleList.size(), select.getElements().size());
         for (int i = 0; i < exampleList.size(); i++) {
             assertEquals(exampleList.get(i), select.getElements().get(i));
+        }
+        assertEquals(select.getPastElements().size(), pastExampleList.size());
+        for (int i = 0; i < pastExampleList.size(); i++) {
+            assertEquals(pastExampleList.get(i), select.getPastElements().get(i));
         }
     }
 
     @Test
     public void testSelectDistinct() throws Exception {
-        SelectStmt<CollectionQuery.Student, CollectionQuery.Student> select = FromStmt.from(exampleList)
+        UnionStmt<CollectionQuery.Student, CollectionQuery.Student> unionStmt = new UnionStmt(pastExampleList);
+        SelectStmt<CollectionQuery.Student, CollectionQuery.Student> select = unionStmt.from(exampleList)
                 .selectDistinct(CollectionQuery.Student.class, CollectionQuery.Student::getName,
                         CollectionQuery.Student::getGroup);
         assertEquals(select.getNumberOfObjects(), -1);
         assertEquals(select.getReturnClass(), CollectionQuery.Student.class);
         assertEquals(select.isDistinct(), true);
-        assertEquals(select.isUnion(), false);
+        assertEquals(select.isUnion(), true);
         Function<CollectionQuery.Student, String>[] functions = new Function[2];
         functions[0] = CollectionQuery.Student::getName;
         functions[1] = CollectionQuery.Student::getGroup;
@@ -94,6 +107,10 @@ public class FromStmtTest extends TestCase {
         assertEquals(exampleList.size(), select.getElements().size());
         for (int i = 0; i < exampleList.size(); i++) {
             assertEquals(exampleList.get(i), select.getElements().get(i));
+        }
+        assertEquals(select.getPastElements().size(), pastExampleList.size());
+        for (int i = 0; i < pastExampleList.size(); i++) {
+            assertEquals(pastExampleList.get(i), select.getPastElements().get(i));
         }
     }
 }

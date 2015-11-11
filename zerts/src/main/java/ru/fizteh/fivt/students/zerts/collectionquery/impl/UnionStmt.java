@@ -5,7 +5,16 @@ import java.util.List;
 import java.util.function.Function;
 
 public class UnionStmt<T, R> {
+    public List<R> getPastElements() {
+        return pastElements;
+    }
+
     private List<R> pastElements = new ArrayList<>();
+
+    public List<T> getElements() {
+        return elements;
+    }
+
     private List<T> elements = new ArrayList<>();
 
     public UnionStmt(Iterable<R> iterable) {
