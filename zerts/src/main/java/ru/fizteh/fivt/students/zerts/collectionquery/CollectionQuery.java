@@ -1,16 +1,14 @@
 package ru.fizteh.fivt.students.zerts.collectionquery;
 
+import ru.fizteh.fivt.students.zerts.collectionquery.impl.Tuple;
+
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
-import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.avg;
-import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.count;
 import static ru.fizteh.fivt.students.zerts.collectionquery.CollectionQuery.Student.student;
-import static ru.fizteh.fivt.students.zerts.collectionquery.Conditions.rlike;
-import static ru.fizteh.fivt.students.zerts.collectionquery.OrderByConditions.asc;
-import static ru.fizteh.fivt.students.zerts.collectionquery.OrderByConditions.desc;
 import static ru.fizteh.fivt.students.zerts.collectionquery.Sources.list;
 import static ru.fizteh.fivt.students.zerts.collectionquery.impl.FromStmt.from;
 
@@ -23,7 +21,7 @@ public class CollectionQuery {
      */
     public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException,
             InstantiationException, IllegalAccessException {
-        Iterable<Statistics> statistics =
+        /*Iterable<Statistics> statistics =
                 from(list(
                         student("iglina", LocalDate.parse("1986-08-06"), "494"),
                         student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
@@ -38,7 +36,7 @@ public class CollectionQuery {
                         .union()
                         .from(list(student("ivanov", LocalDate.parse("1985-08-06"), "494")))
                         .selectDistinct(Statistics.class, s -> "all", count(s -> 1), avg(Student::age))
-                        .execute();
+                        .execute();*/
 
         /*List<Student> ex = new ArrayList<>();
         ex.add(student("iglina", LocalDate.parse("1986-08-06"), "494"));
@@ -65,9 +63,19 @@ public class CollectionQuery {
                                 student("iglina", LocalDate.parse("1986-08-06"), "494")))
                                 .select(Student.class, Student::getName, Student::getGroup)
                                 .execute();*/
-        statistics.forEach(System.out::print);
-    }
+        Tuple a = new Tuple("1", "2");
+        //System.out.println(a.getFirst().getClass());
+        //System.out.println(a.getClass());
 
+        Iterable<Tuple<String, String>> mentorsByStudent =
+                from(list(student("ivanov", LocalDate.parse("1985-08-06"), "494")))
+                        .join(list(new Group("494", "mr.sidorov")))
+                        .on((s, g) -> Objects.equals(s.getGroup(), g.getGroup()))
+                        .select(sg -> sg.getFirst().getName(), sg -> sg.getSecond().getMentor())
+                        .execute();
+        //statistics.forEach(System.out::print);
+        mentorsByStudent.forEach(System.out::print);
+    }
 
     public static class Student {
         private final String name;
@@ -131,6 +139,24 @@ public class CollectionQuery {
         }
     }
 
+    public static class Group {
+        private final String group;
+        private final String mentor;
+
+        public Group(String group, String mentor) {
+            this.group = group;
+            this.mentor = mentor;
+        }
+
+        public String getGroup() {
+            return group;
+        }
+
+        public String getMentor() {
+            return mentor;
+        }
+    }
+
 
     public static class Statistics {
 
@@ -156,7 +182,7 @@ public class CollectionQuery {
             this.age = null;
         }
 
-        /*public Statistics(String group, Integer count, Double age) {
+        public Statistics(String group, Integer count, Double age) {
             this.group = group;
             this.count = count;
             this.age = age;
@@ -166,7 +192,7 @@ public class CollectionQuery {
             this.group = group;
             this.count = null;
             this.age = null;
-        }*/
+        }
 
         @Override
         public String toString() {

@@ -14,7 +14,7 @@ public class SelectStmt<T, R> {
         return isDistinct;
     }
 
-    public Function<T, ?>[] getFunctions() {
+    public Function[] getFunctions() {
         return functions;
     }
 
@@ -36,7 +36,7 @@ public class SelectStmt<T, R> {
 
     private boolean isDistinct;
     private Class returnClass;
-    private Function<T, ?>[] functions;
+    private Function[] functions;
     private List<T> elements;
 
     public List<R> getPastElements() {
@@ -53,6 +53,7 @@ public class SelectStmt<T, R> {
 
     private CQLComparator<R> cqlComparator;
     private boolean isUnion;
+    private boolean isJoin;
 
     @SafeVarargs
     public SelectStmt(List<T> elements, Class<R> returnClass, boolean isDistinct, Function<T, ?>... functions) {
@@ -66,6 +67,21 @@ public class SelectStmt<T, R> {
         this.functions = functions;
         this.numberOfObjects = -1;
         this.isUnion = false;
+        this.isJoin = false;
+    }
+
+    public SelectStmt(List<T> elements, boolean isDistinct, Function<T, ?> first, Function<T, ?> second) {
+        this.elements = new ArrayList<>();
+        for (T element : elements) {
+            //System.out.println(element.toString());
+            this.elements.add(element);
+        }
+        this.returnClass = elements.get(0).getClass();
+        this.isDistinct = isDistinct;
+        this.functions = new Function[]{first, second};
+        this.numberOfObjects = -1;
+        this.isUnion = false;
+        this.isJoin = true;
     }
 
     @SafeVarargs
@@ -153,9 +169,13 @@ public class SelectStmt<T, R> {
                     }
                     returnClasses[i] = arguments[i].getClass();
                 }
-                @SuppressWarnings("unchecked")
-                R newElement = (R) returnClass.getConstructor(returnClasses).newInstance(arguments);
-                result.add(newElement);
+                if (isJoin) {
+                    Tuple newElement = new Tuple(arguments[0], arguments[1]);
+                    result.add((R) newElement);
+                } else {
+                    R newElement = (R) returnClass.getConstructor(returnClasses).newInstance(arguments);
+                    result.add(newElement);
+                }
             }
         } else {
             for (T element : this.elements) {
@@ -170,9 +190,13 @@ public class SelectStmt<T, R> {
                     }
                     returnClasses[i] = arguments[i].getClass();
                 }
-                @SuppressWarnings("unchecked")
-                R newElement = (R) returnClass.getConstructor(returnClasses).newInstance(arguments);
+                if (isJoin) {
+                    Tuple newElement = new Tuple(arguments[0], arguments[1]);
+                    result.add((R) newElement);
+                } else {
+                    R newElement = (R) returnClass.getConstructor(returnClasses).newInstance(arguments);
                     result.add(newElement);
+                }
             }
         }
         if (havingCondition != null) {
