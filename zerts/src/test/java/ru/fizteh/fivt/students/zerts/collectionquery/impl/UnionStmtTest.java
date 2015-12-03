@@ -2,7 +2,6 @@ package ru.fizteh.fivt.students.zerts.collectionquery.impl;
 
 import junit.framework.TestCase;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import ru.fizteh.fivt.students.zerts.collectionquery.CollectionQuery;
@@ -39,7 +38,7 @@ public class UnionStmtTest extends TestCase {
         student = new CollectionQuery.Student("zertsalov", LocalDate.parse("1996-10-29"), "495");
     }
 
-    @Test
+    /*@Test
     public void testFrom() throws Exception {
         UnionStmt<CollectionQuery.Student, CollectionQuery.Student> unionStmt = new UnionStmt(exampleList);
         unionStmt = unionStmt.from(exampleList);
@@ -112,5 +111,5 @@ public class UnionStmtTest extends TestCase {
         for (int i = 0; i < pastExampleList.size(); i++) {
             assertEquals(pastExampleList.get(i), select.getPastElements().get(i));
         }
-    }
+    }*/
 }

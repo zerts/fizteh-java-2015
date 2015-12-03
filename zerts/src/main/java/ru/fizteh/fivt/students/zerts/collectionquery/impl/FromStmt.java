@@ -33,7 +33,7 @@ public class FromStmt<T> {
         return new SelectStmt<>(elements, returnClass, true, functions);
     }
 
-    public final <F, S> SelectStmt<T, Tuple<String, String>> select(Function<T, F> first, Function<T, S> second) {
+    public final <F, S> SelectStmt<T, Tuple<F, S>> select(Function<T, F> first, Function<T, S> second) {
         return new SelectStmt<>(elements, false, first, second);
     }
 

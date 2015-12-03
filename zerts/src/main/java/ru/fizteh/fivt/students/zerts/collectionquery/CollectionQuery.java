@@ -8,7 +8,12 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
+import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.avg;
+import static ru.fizteh.fivt.students.zerts.collectionquery.Aggregates.count;
 import static ru.fizteh.fivt.students.zerts.collectionquery.CollectionQuery.Student.student;
+import static ru.fizteh.fivt.students.zerts.collectionquery.Conditions.rlike;
+import static ru.fizteh.fivt.students.zerts.collectionquery.OrderByConditions.asc;
+import static ru.fizteh.fivt.students.zerts.collectionquery.OrderByConditions.desc;
 import static ru.fizteh.fivt.students.zerts.collectionquery.Sources.list;
 import static ru.fizteh.fivt.students.zerts.collectionquery.impl.FromStmt.from;
 
@@ -21,7 +26,7 @@ public class CollectionQuery {
      */
     public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException,
             InstantiationException, IllegalAccessException {
-        /*Iterable<Statistics> statistics =
+        Iterable<Statistics> statistics =
                 from(list(
                         student("iglina", LocalDate.parse("1986-08-06"), "494"),
                         student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
@@ -36,7 +41,8 @@ public class CollectionQuery {
                         .union()
                         .from(list(student("ivanov", LocalDate.parse("1985-08-06"), "494")))
                         .selectDistinct(Statistics.class, s -> "all", count(s -> 1), avg(Student::age))
-                        .execute();*/
+                        .execute();
+        statistics.forEach(System.out::print);
 
         /*List<Student> ex = new ArrayList<>();
         ex.add(student("iglina", LocalDate.parse("1986-08-06"), "494"));
@@ -63,17 +69,28 @@ public class CollectionQuery {
                                 student("iglina", LocalDate.parse("1986-08-06"), "494")))
                                 .select(Student.class, Student::getName, Student::getGroup)
                                 .execute();*/
-        Tuple a = new Tuple("1", "2");
+        //Tuple a = new Tuple("1", "2");
         //System.out.println(a.getFirst().getClass());
         //System.out.println(a.getClass());
 
         Iterable<Tuple<String, String>> mentorsByStudent =
-                from(list(student("ivanov", LocalDate.parse("1985-08-06"), "494")))
-                        .join(list(new Group("494", "mr.sidorov")))
+                from(list(student("ivanov", LocalDate.parse("1985-08-06"), "494"),
+                            student("iglina", LocalDate.parse("1986-08-06"), "494"),
+                            student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
+                            student("zertsalov", LocalDate.parse("1986-08-06"), "495")))
+                        .join(list(Group.group("494", "mr.sidorov")))
+                        .on((s, g) -> Objects.equals(s.getGroup(), g.getGroup()))
+                        .select(sg -> sg.getFirst().getName(), sg -> sg.getSecond().getMentor())
+                        .where(s -> Objects.equals(s.getFirst().getName(), "iglina"))
+                        .union()
+                        .from(list(student("ivanov", LocalDate.parse("1985-08-06"), "494"),
+                                student("iglina", LocalDate.parse("1986-08-06"), "494"),
+                                student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
+                                student("zertsalov", LocalDate.parse("1986-08-06"), "495")))
+                        .join(list(Group.group("495", "mr.kormushin")))
                         .on((s, g) -> Objects.equals(s.getGroup(), g.getGroup()))
                         .select(sg -> sg.getFirst().getName(), sg -> sg.getSecond().getMentor())
                         .execute();
-        //statistics.forEach(System.out::print);
         mentorsByStudent.forEach(System.out::print);
     }
 
@@ -154,6 +171,23 @@ public class CollectionQuery {
 
         public String getMentor() {
             return mentor;
+        }
+
+        public static Group group(String ggroup, String mmentor) {
+            return new Group(ggroup, mmentor);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder result = new StringBuilder().append("Student{");
+            if (group != null) {
+                result.append("group='").append(group).append('\'');
+            }
+            if (mentor != null) {
+                result.append(", name=").append(mentor);
+            }
+            result.append("}\n");
+            return result.toString();
         }
     }
 

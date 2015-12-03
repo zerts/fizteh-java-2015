@@ -24,6 +24,6 @@ public class Tuple<F, S> {
         return "Tuple{"
                 + "first=" + first
                 + ", second=" + second
-                + '}';
+                + "}\n";
     }
 }

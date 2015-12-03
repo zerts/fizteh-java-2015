@@ -99,6 +99,22 @@ public class SelectStmt<T, R> {
         this.pastElements = pastElements;
     }
 
+    public SelectStmt(List<R> pastElements, List<T> elements, boolean isDistinct, Function<T, ?> first,
+                      Function<T, ?> second) {
+        this.elements = new ArrayList<>();
+        for (T element : elements) {
+            //System.out.println(element.toString());
+            this.elements.add(element);
+        }
+        this.returnClass = elements.get(0).getClass();
+        this.isDistinct = isDistinct;
+        this.functions = new Function[]{first, second};
+        this.numberOfObjects = -1;
+        this.isUnion = true;
+        this.isJoin = true;
+        this.pastElements = pastElements;
+    }
+
     public SelectStmt<T, R> where(Predicate<T> predicate) {
         this.whereCondition = predicate;
         return this;
@@ -242,7 +258,11 @@ public class SelectStmt<T, R> {
     public UnionStmt<T, R> union() throws InvocationTargetException, NoSuchMethodException,
             InstantiationException, IllegalAccessException {
         List<R> result = (List<R>) this.execute();
-        return new UnionStmt(result);
+        if (isJoin) {
+            return new UnionStmt<>(result, true);
+        } else {
+            return new UnionStmt<>(result);
+        }
     }
 
     public class CQLComparator<K> implements Comparator<K> {

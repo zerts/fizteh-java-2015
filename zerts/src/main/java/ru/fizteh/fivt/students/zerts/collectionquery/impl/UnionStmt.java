@@ -2,7 +2,9 @@ package ru.fizteh.fivt.students.zerts.collectionquery.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class UnionStmt<T, R> {
     public List<R> getPastElements() {
@@ -10,6 +12,7 @@ public class UnionStmt<T, R> {
     }
 
     private List<R> pastElements = new ArrayList<>();
+    private List<Tuple<T, R>> pastTupleElements = new ArrayList<>();
 
     public List<T> getElements() {
         return elements;
@@ -17,33 +20,105 @@ public class UnionStmt<T, R> {
 
     private List<T> elements = new ArrayList<>();
 
+    private boolean isTuple;
+
     public UnionStmt(Iterable<R> iterable) {
         for (R curr : iterable) {
             pastElements.add(curr);
         }
+        this.isTuple = false;
     }
 
-    public UnionStmt(Iterable<R> pastElements, Iterable<T> elements) {
-        for (R curr : pastElements) {
-            this.pastElements.add(curr);
+    public UnionStmt(Iterable<R> iterable, boolean isTuple) {
+        for (R curr : iterable) {
+            pastElements.add(curr);
         }
-        for (T curr : elements) {
-            this.elements.add(curr);
+        this.isTuple = true;
+    }
+
+    public <S> FromClause<S, R> from(Iterable<S> elements) {
+        if (isTuple) {
+            return new FromClause<S, R>(pastElements, elements);
+        } else {
+            return new FromClause<S, R>(pastElements, /*(Iterable<T>)*/ elements);
         }
     }
 
-    public UnionStmt<T, R> from(Iterable<T> elements) {
-        return new UnionStmt<>(pastElements, elements);
+
+
+
+
+    public class FromClause<S, R> {
+        public List<R> getPastElements() {
+            return pastElements;
+        }
+        private List<R> pastElements = new ArrayList<>();
+
+        public List<S> getElements() {
+            return elements;
+        }
+        private List<S> elements = new ArrayList<>();
+
+        public FromClause(Iterable<R> pastElements, Iterable<S> elements) {
+            for (R curr : pastElements) {
+                this.pastElements.add(curr);
+            }
+            for (S curr : elements) {
+                this.elements.add(curr);
+            }
+        }
+        @SafeVarargs
+        public final SelectStmt<S, R> select(Class<R> returnClass, Function<S, ?>... functions) {
+            return new SelectStmt<S, R>((List<R>) pastElements, elements, returnClass, false, functions);
+        }
+
+        public final <F, Z> SelectStmt<S, Tuple<F, Z>> select(Function<S, F> first, Function<S, Z> second) {
+            return new SelectStmt<S, Tuple<F, Z>>((List<Tuple<F, Z>>) pastElements, elements, false, first, second);
+        }
+
+        @SafeVarargs
+        public final SelectStmt<S, R> selectDistinct(Class<R> returnClass, Function<S, ?>... functions) {
+            return new SelectStmt<S, R>((List<R>) pastElements, elements, returnClass, true, functions);
+        }
+
+        public <J> JoinClause<R, S, J> join(Iterable<J> iterable) {
+            return new JoinClause<R, S, J>(pastElements, elements, iterable);
+        }
     }
 
+    public class JoinClause<R, F, J> {
 
-     @SafeVarargs
-     public final SelectStmt<T, R> select(Class<R> returnClass, Function<T, ?>... functions) {
-        return new SelectStmt<T, R>((List<R>) pastElements, elements, returnClass, false, functions);
-    }
+        private List<F> firstElements = new ArrayList<>();
+        private List<J> secondElements = new ArrayList<>();
+        private List<R> pastElements = new ArrayList<>();
+        private List<Tuple<F, J>> elements = new ArrayList<>();
 
-    @SafeVarargs
-    public final SelectStmt<T, R> selectDistinct(Class<R> returnClass, Function<T, ?>... functions) {
-        return new SelectStmt<T, R>((List<R>) pastElements, elements, returnClass, true, functions);
+        public JoinClause(List<R> pastElements, List<F> firstElements, Iterable<J> secondElements) {
+            this.pastElements.addAll(pastElements.stream().collect(Collectors.toList()));
+            this.firstElements.addAll(firstElements.stream().collect(Collectors.toList()));
+            for (J curr : secondElements) {
+                this.secondElements.add(curr);
+            }
+            //secondElements.forEach(System.out::print);
+        }
+
+        public FromClause<Tuple<F, J>, R> on(BiPredicate<F, J> condition) {
+            for (F first : firstElements) {
+                for (J second : secondElements) {
+                    if (condition.test(first, second)) {
+                        elements.add(new Tuple<>(first, second));
+                    }
+                }
+            }
+            //System.out.println(secondElements.get(0));
+            //System.out.println(elements.get(0));
+            return new FromClause<>(pastElements, elements);
+        }
+
+        public <K extends Comparable<?>> FromStmt<Tuple<F, J>> on(
+                Function<F, K> leftKey,
+                Function<J, K> rightKey) {
+            throw new UnsupportedOperationException();
+        }
     }
 }
