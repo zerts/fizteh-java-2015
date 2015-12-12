@@ -6,10 +6,7 @@ import ru.fizteh.fivt.students.zerts.TwitterStream.exceptions.GeoExeption;
 import twitter4j.*;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-
-import static java.lang.Thread.sleep;
 
 public class TwitterStream {
 
@@ -22,11 +19,11 @@ public class TwitterStream {
     }
 
     private String formatTweet(Status status) {
-        try {
+        /*try {
             sleep(TimeUnit.SECONDS.toMillis(1L));
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
         return "@" + status.getUser().getScreenName() + ": " + status.getText();
     }
 
