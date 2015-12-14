@@ -1,6 +1,7 @@
 package ru.fizteh.fivt.students.zerts.collectionquery.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -115,10 +116,25 @@ public class UnionStmt<T, R> {
             return new FromClause<>(pastElements, elements);
         }
 
-        public <K extends Comparable<?>> FromStmt<Tuple<F, J>> on(
+        public <K extends Comparable<?>> FromClause<Tuple<F, J>, R> on(
                 Function<F, K> leftKey,
                 Function<J, K> rightKey) {
-            throw new UnsupportedOperationException();
+            HashMap<K, List<J>> map = new HashMap<>();
+            for (J element : secondElements) {
+                K key = rightKey.apply(element);
+                if (!map.containsKey(key)) {
+                    map.put(key, new ArrayList<>());
+                }
+                map.get(key).add(element);
+        }
+            for (F first : firstElements) {
+                K key = leftKey.apply(first);
+                if (map.containsKey(key)) {
+                    List<J> second = map.get(key);
+                    second.forEach(s -> elements.add(new Tuple<>(first, s)));
+                }
+            }
+            return new FromClause<>(pastElements, elements);
         }
     }
 }

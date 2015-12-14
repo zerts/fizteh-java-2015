@@ -88,7 +88,7 @@ public class CollectionQuery {
                                 student("kargaltsev", LocalDate.parse("1986-08-06"), "495"),
                                 student("zertsalov", LocalDate.parse("1986-08-06"), "495")))
                         .join(list(Group.group("495", "mr.kormushin")))
-                        .on((s, g) -> Objects.equals(s.getGroup(), g.getGroup()))
+                        .on(s -> s.getGroup(), f -> f.getGroup())
                         .select(sg -> sg.getFirst().getName(), sg -> sg.getSecond().getMentor())
                         .execute();
         mentorsByStudent.forEach(System.out::print);
