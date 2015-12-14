@@ -126,7 +126,7 @@ public class UnionStmt<T, R> {
                     map.put(key, new ArrayList<>());
                 }
                 map.get(key).add(element);
-        }
+            }
             for (F first : firstElements) {
                 K key = leftKey.apply(first);
                 if (map.containsKey(key)) {
