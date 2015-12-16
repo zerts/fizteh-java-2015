@@ -39,10 +39,6 @@ public class SelectStmt<T, R> {
     private Function[] functions;
     private List<T> elements;
 
-    public List<R> getPastElements() {
-        return pastElements;
-    }
-
     private List<R> pastElements;
 
     private Predicate<T> whereCondition;

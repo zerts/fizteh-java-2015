@@ -8,18 +8,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class UnionStmt<T, R> {
-    public List<R> getPastElements() {
-        return pastElements;
-    }
 
     private List<R> pastElements = new ArrayList<>();
-    private List<Tuple<T, R>> pastTupleElements = new ArrayList<>();
-
-    public List<T> getElements() {
-        return elements;
-    }
-
-    private List<T> elements = new ArrayList<>();
 
     private boolean isTuple;
 
@@ -39,29 +29,20 @@ public class UnionStmt<T, R> {
 
     public <S> FromClause<S, R> from(Iterable<S> elements) {
         if (isTuple) {
-            return new FromClause<S, R>(pastElements, elements);
+            return new FromClause<>(pastElements, elements);
         } else {
-            return new FromClause<S, R>(pastElements, /*(Iterable<T>)*/ elements);
+            return new FromClause<>(pastElements, /*(Iterable<T>)*/ elements);
         }
     }
 
 
+    public class FromClause<S, Q> {
+        private List<Q> pastElements = new ArrayList<>();
 
-
-
-    public class FromClause<S, R> {
-        public List<R> getPastElements() {
-            return pastElements;
-        }
-        private List<R> pastElements = new ArrayList<>();
-
-        public List<S> getElements() {
-            return elements;
-        }
         private List<S> elements = new ArrayList<>();
 
-        public FromClause(Iterable<R> pastElements, Iterable<S> elements) {
-            for (R curr : pastElements) {
+        public FromClause(Iterable<Q> pastElements, Iterable<S> elements) {
+            for (Q curr : pastElements) {
                 this.pastElements.add(curr);
             }
             for (S curr : elements) {
@@ -69,32 +50,33 @@ public class UnionStmt<T, R> {
             }
         }
         @SafeVarargs
-        public final SelectStmt<S, R> select(Class<R> returnClass, Function<S, ?>... functions) {
-            return new SelectStmt<S, R>((List<R>) pastElements, elements, returnClass, false, functions);
+        public final SelectStmt<S, Q> select(Class<Q> returnClass, Function<S, ?>... functions) {
+            return new SelectStmt<>(pastElements, elements, returnClass, false, functions);
         }
 
         public final <F, Z> SelectStmt<S, Tuple<F, Z>> select(Function<S, F> first, Function<S, Z> second) {
-            return new SelectStmt<S, Tuple<F, Z>>((List<Tuple<F, Z>>) pastElements, elements, false, first, second);
+            return new SelectStmt<>((List<Tuple<F, Z>>) pastElements, elements, false, first, second);
         }
 
         @SafeVarargs
-        public final SelectStmt<S, R> selectDistinct(Class<R> returnClass, Function<S, ?>... functions) {
-            return new SelectStmt<S, R>((List<R>) pastElements, elements, returnClass, true, functions);
+        public final SelectStmt<S, Q> selectDistinct(Class<Q> returnClass, Function<S, ?>... functions) {
+            return new SelectStmt<>(pastElements, elements, returnClass, true, functions);
         }
 
-        public <J> JoinClause<R, S, J> join(Iterable<J> iterable) {
-            return new JoinClause<R, S, J>(pastElements, elements, iterable);
+        public <J> JoinClause<Q, S, J> join(Iterable<J> iterable) {
+            return new JoinClause<>(pastElements, elements, iterable);
         }
     }
 
-    public class JoinClause<R, F, J> {
+
+    public class JoinClause<W, F, J> {
 
         private List<F> firstElements = new ArrayList<>();
         private List<J> secondElements = new ArrayList<>();
-        private List<R> pastElements = new ArrayList<>();
+        private List<W> pastElements = new ArrayList<>();
         private List<Tuple<F, J>> elements = new ArrayList<>();
 
-        public JoinClause(List<R> pastElements, List<F> firstElements, Iterable<J> secondElements) {
+        public JoinClause(List<W> pastElements, List<F> firstElements, Iterable<J> secondElements) {
             this.pastElements.addAll(pastElements.stream().collect(Collectors.toList()));
             this.firstElements.addAll(firstElements.stream().collect(Collectors.toList()));
             for (J curr : secondElements) {
@@ -103,7 +85,7 @@ public class UnionStmt<T, R> {
             //secondElements.forEach(System.out::print);
         }
 
-        public FromClause<Tuple<F, J>, R> on(BiPredicate<F, J> condition) {
+        public FromClause<Tuple<F, J>, W> on(BiPredicate<F, J> condition) {
             for (F first : firstElements) {
                 for (J second : secondElements) {
                     if (condition.test(first, second)) {
@@ -116,7 +98,7 @@ public class UnionStmt<T, R> {
             return new FromClause<>(pastElements, elements);
         }
 
-        public <K extends Comparable<?>> FromClause<Tuple<F, J>, R> on(
+        public <K extends Comparable<?>> FromClause<Tuple<F, J>, W> on(
                 Function<F, K> leftKey,
                 Function<J, K> rightKey) {
             HashMap<K, List<J>> map = new HashMap<>();

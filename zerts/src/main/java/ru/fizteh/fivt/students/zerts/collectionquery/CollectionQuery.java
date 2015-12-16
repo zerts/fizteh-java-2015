@@ -39,8 +39,10 @@ public class CollectionQuery {
                         .orderBy(asc(Statistics::getGroup), desc(count(Statistics::getGroup)))
                         .limit(100)
                         .union()
-                        .from(list(student("ivanov", LocalDate.parse("1985-08-06"), "494")))
-                        .selectDistinct(Statistics.class, s -> "all", count(s -> 1), avg(Student::age))
+                        .from(list(student("ivanov", LocalDate.parse("1985-08-06"), "494"),
+                                student("ivanova", LocalDate.parse("1975-08-06"), "494")))
+                        .selectDistinct(Statistics.class, s -> "all", count(Student::getDateOfBith), avg(Student::age))
+                        .groupBy(Student::getGroup)
                         .execute();
         statistics.forEach(System.out::print);
 

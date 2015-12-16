@@ -12,7 +12,7 @@ public class FromStmt<T> {
         return elements;
     }
 
-    private List<T> elements = new ArrayList<T>();
+    private List<T> elements = new ArrayList<>();
 
     public FromStmt(Iterable<T> iterable) {
         for (T curr : iterable) {
@@ -39,7 +39,7 @@ public class FromStmt<T> {
     }
 
     public <J> JoinClause<T, J> join(Iterable<J> iterable) {
-        return new JoinClause<T, J>(elements, iterable);
+        return new JoinClause<>(elements, iterable);
     }
 
     public class JoinClause<S, J> {
